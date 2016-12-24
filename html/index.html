@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Hello World!</title>
+    <link rel="stylesheet" type="text/css" href="../node_modules/bootstrap/dist/css/bootstrap.min.css" />
+    <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
+    <style>
+    body {
+      margin-top: 30px;
+    }
+    </style>
+  </head>
+  <body ng-app="homeMovies" ng-controller="main">
+    <div class="container">
+      <p ng-if="!castConnected">
+        <chrome-cast></chrome-cast>
+      </p>
+      <p ng-if="castConnected">
+        <file-select></file-select>
+        <player-controls></player-controls>
+        <player-stats></player-stats>
+      </p>
+    </div>
+  </body>
+
+  <script>
+    // You can also require other files to run in this process
+    require('./renderer.js')
+  </script>
+</html>

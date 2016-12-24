@@ -1,0 +1,26 @@
+{
+  "name": "extracast-app",
+  "version": "0.0.1",
+  "description": "A rock solid, cross platform desktop application for streaming to your Chromecast.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "repository": "https://github.com/dudewheresmycode/Extracast",
+  "author": "dudewheremycode",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^1.4.1"
+  },
+  "dependencies": {
+    "angular": "^1.6.0",
+    "bootstrap": "^4.0.0-alpha.5",
+    "castv2-client": "^1.1.2",
+    "ffbinaries": "^0.1.2",
+    "jquery": "^3.1.1",
+    "mdns": "^2.3.3",
+    "moment": "^2.17.1",
+    "stream-transcoder": "0.0.5"
+  }
+}
