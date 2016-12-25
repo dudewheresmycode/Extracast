@@ -8,7 +8,7 @@
   },
   "keywords": [],
   "repository": "https://github.com/dudewheresmycode/Extracast",
-  "author": "dudewheremycode",
+  "author": "dudewheresmycode",
   "license": "MIT",
   "devDependencies": {
     "electron": "^1.4.1"
