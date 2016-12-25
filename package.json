@@ -4,6 +4,7 @@
   "description": "A rock solid, cross platform desktop application for streaming to your Chromecast.",
   "main": "main.js",
   "scripts": {
+    "postinstall": "npm rebuild --runtime=electron --target=1.4.1 --disturl=https://atom.io/download/atom-shell --abi=50",
     "start": "electron ."
   },
   "keywords": [],

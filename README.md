@@ -1,9 +1,8 @@
-# Extracast
+# [Extracast](http://extracast.io)
 
 A rock solid, cross platform desktop application for streaming to your Chromecast.
 
 **Download App**
-
 Checkout the [latest releases](releases) to download the desktop application.
 
 ## To Use
@@ -15,6 +14,7 @@ To clone and debug this repository you'll need [Git](https://git-scm.com) and [N
 git clone https://github.com/dudewheresmycode/Extracast
 # Install dependencies
 npm install
+npm run build_mdns
 # Run the app
 npm start
 ```
