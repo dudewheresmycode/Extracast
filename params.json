@@ -1,6 +1,6 @@
 {
   "name": "Extracast",
-  "tagline": "Extracast allows playback of virtually any video format from your Mac to your Chromecast.",
-  "body": "# Extracast\r\n\r\nExtracast allows playback of virtually any video format from your Mac to your Chromecast.\r\n\r\n# License\r\n\r\nExtracast is licensed under the GNU Public License.\r\n\r\n\r\n#Basic Usage\r\n 1. Download the latest build.\r\n \r\n 2. Fire up the server.\r\n \r\n 3. Open the player client.\r\n \r\n 4. Select one or more video files and add them to your playlist.\r\n \r\n 5. Connect to your Chromecast, grab a bowl of popcorn and enjoy!",
+  "tagline": "Extracast is a modern, hackable media player.",
+  "body": "# Extracast\r\n\r\nExtracast is a modern, hackable media player for Mac, Linux and Windows.\r\n\r\n# License\r\n\r\nExtracast is licensed under the GNU Public License.\r\n\r\n\r\n#Basic Usage\r\n 1. Download the latest build.\r\n \r\n 2. Fire up the server.\r\n \r\n 3. Open the player client.\r\n \r\n 4. Select one or more video files and add them to your playlist.\r\n \r\n 5. Connect to your Chromecast, grab a bowl of popcorn and enjoy!",
   "note": "Don't delete this file! It's used internally to help with page regeneration."
 }

@@ -1,0 +1,5 @@
+node_modules
+releases
+db.json
+app
+.DS_Store
