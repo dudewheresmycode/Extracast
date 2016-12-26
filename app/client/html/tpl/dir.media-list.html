@@ -1,0 +1,24 @@
+<div class="container">
+
+  <div class="button-bar">
+    <media-select></media-select>
+  </div>
+
+  <div class="list-group">
+    <a href ng-repeat="item in list() track by $index" ng-click="$play(item)" class="list-group-item">
+      <div class="list-group-art">
+        <img ng-src="{{item.thumbnails.square|loader}}" class="list-group-image" />
+      </div>
+      <!-- <span class="icon icon-file-video"></span> -->
+      <div class="list-group-content">
+        <div class="list-group-static">{{item.file.name}}</div>
+        <div class="list-group-static text-muted">
+          <span class="inline-item"><span class="icon icon-clock"></span> {{item.meta.duration|hhmmss}}</span>
+          <span class="inline-item"><span class="icon icon-info"></span> {{item.meta.format}}</span>
+          <span class="inline-item"><span class="icon icon-drive"></span> {{item.file.size|bytes}}</span>
+        </div>
+      </div>
+    </a>
+  </ul>
+  <!-- <pre>{{list()}}</pre> -->
+</div>

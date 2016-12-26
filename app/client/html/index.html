@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Extracast</title>
+    <!-- <link rel="stylesheet" type="text/css" href="../../node_modules/bootstrap/dist/css/bootstrap-reboot.min.css" /> -->
+    <link rel="stylesheet" type="text/css" href="../styles/sf-font/font.css" />
+    <link rel="stylesheet" type="text/css" href="../styles/icomoon/style.css" />
+    <link rel="stylesheet" type="text/css" href="../styles/app.css" />
+  </head>
+  <body ng-app="extracast" ng-controller="main">
+
+
+    <div class="app-container">
+
+      <div class="app-titlebar">
+      </div>
+
+      <div class="app-view">
+        <div class="app-sidebar">
+          <div option-input data-key="video.size"></div>
+
+          <pre>{{status()|json}}</pre>
+
+        </div>
+        <div class="app-main">
+          <media-list></media-list>
+        </div>
+      </div>
+
+      <video-player></video-player>
+
+      <div class="app-player-controls">
+        <player-controls></player-controls>
+      </div>
+
+        <!-- <player-stats></player-stats> -->
+    </div>
+
+
+    <script>
+      // You can also require other files to run in this process
+      require('../js/renderer.js')
+    </script>
+    <script src="../../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+</body>
+
+</html>

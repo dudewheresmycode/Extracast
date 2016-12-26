@@ -1,0 +1,18 @@
+
+<!-- <a  class="btn btn-secondary">Chromecast Connect</a> -->
+
+<div class="dropdown dropup">
+  <a class="btn dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <img ng-src="{{castIcon()}}" class="icon cast-icon inline-icon" />
+  </a>
+  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+    <a ng-if="_isc()" class="dropdown-item bg-danger" ng-click="$disconnect()">
+      Disconnect
+    </a>
+    <a ng-repeat="device in devices()" class="dropdown-item" ng-click="$connect(device)">
+      <span class="icon icon-fw icon-display"></span> {{device.txtRecord.fn}}
+    </a>
+  </div>
+</div>
+
+<!-- <pre>Devices: {{devices()|json}}</pre> -->

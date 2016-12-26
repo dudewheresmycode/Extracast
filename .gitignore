@@ -1,3 +1,6 @@
 node_modules
 tmp
 ffmpeg_build
+db.json
+releases
+tests
