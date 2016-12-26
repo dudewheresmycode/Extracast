@@ -9,8 +9,7 @@ Checkout the [latest releases](/dudewheresmycode/Extracast/releases) to download
 
 If you want to contribute, or just tinker with the project, you'll need [Git](https://git-scm.com) and [Node.js](https://nodejs.org/en/download/) (which comes with [npm](http://npmjs.com)) installed on your computer. Then from your command line:
 
-```
-  bash
+```bash
   # Clone this repository
   git clone https://github.com/dudewheresmycode/Extracast
   # Install
