@@ -1,9 +1,11 @@
 # [Extracast](http://extracast.io)
 
-A rock solid, cross platform desktop application for streaming to your Chromecast.
+Extracast is a modern, hackable media player.
 
 **Download App**
 Checkout the [latest releases](/dudewheresmycode/Extracast/releases) to download the desktop application.
+
+---
 
 **Getting Started**
 
