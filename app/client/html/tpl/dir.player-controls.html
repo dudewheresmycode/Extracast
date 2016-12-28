@@ -1,9 +1,7 @@
 <nav class="navbar">
 
   <div class="navinfo">
-    <div class="navinfo-art">
-      <img ng-if="_activeMedia()" ng-src="{{_activeMedia().thumbnails.square|noSrc}}" />
-    </div>
+    <div class="navinfo-art" ng-style="(_activeMedia().thumbnails.square|bgImage)"></div>
     <div class="navinfo-info">
       <div class="navinfo-info-heading"><a href>{{_activeMedia().file.name||'&nbsp;'}}</a></div>
       <div class="navinfo-info-subheading text-muted">{{currentTime|hhmmss}} / {{_activeMedia().meta.duration|hhmmss}}</div>
@@ -24,12 +22,8 @@
               <span class="icon icon-cog"></span>
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-              <a ng-if="_isc()" class="dropdown-item bg-danger" ng-click="$disconnect()">
-                Disconnect
-              </a>
-              <a ng-repeat="device in devices()" class="dropdown-item" ng-click="$connect(device)">
-                <span class="icon icon-fw icon-display"></span> {{device.txtRecord.fn}}
-              </a>
+              <a class="dropdown-item">Video Settings</a>
+              <a class="dropdown-item">Caption Settings</a>
             </div>
           </div>
         </li>
@@ -42,8 +36,8 @@
         <li class="nav-item">
           <a href ng-click="$fullscreen()"><span class="icon icon-forward3"></span></a>
         </li>
-        <li class="nav-item">
-          <a href ng-click="$fullscreen()"><span class="icon icon-enlarge2"></span></a>
+        <li class="nav-item" ng-class="{disabled:playerType==CHROMECAST_PLAYER}">
+          <a href ng-click="$fullscreen()"><span class="icon icon-enlarge2"></span> p{{activeMedia}}</a>
         </li>
       </ul>
     </div>

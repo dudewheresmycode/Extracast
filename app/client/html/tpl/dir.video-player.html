@@ -1,9 +1,12 @@
-<div class="video-view" ng-show="activeMedia">
-  <div class="video-splash" ng-style="{'background-image':'url('+activeMedia.thumbnails.full+')'}"></div>
+<div class="video-view" ng-show="activeMedia" ng-class="{minified:minified}">
+  <div class="video-splash">
+    <div class="video-splash-bg" ng-style="{'background-image':'url(\'file://'+activeMedia.thumbnails.full+'\')'}"></div>
+    <div class="video-splash-icon chromecast-icon" ng-if="playerType==CHROMECAST_PLAYER" ng-include="'../images/chromecast/ic_cast_connected_24dp.svg'"></div>
+  </div>
 
-  <div class="video-content" ng-show="playerState==STATE_PLAYING||playerState==STATE_PAUSED"><video id="thevideo"></video></div>
+  <div class="video-content" ng-show="(playerState==STATE_PLAYING||playerState==STATE_PAUSED) && playerType!=CHROMECAST_PLAYER"><video id="thevideo"></video></div>
 
-  <div class="video-splash-overlay" ng-class="{active:playerState!=STATE_PLAYING}">
+  <!-- <div class="video-splash-overlay" ng-class="{active:(playerState!=STATE_PLAYING||mouseActive||playerType==CHROMECAST_PLAYER)}" ng-hide="minified">
     <div class="video-splash-overlay-content">
       <h3 class="video-splash-overlay-title">{{activeMedia.file.name}}</h3>
       <p class="video-splash-overlay-sub text-muted">
@@ -12,7 +15,7 @@
         <span class="inline-item"><span class="icon icon-drive"></span> {{activeMedia.file.size|bytes}}</span>
       </p>
     </div>
-  </div>
+  </div> -->
 
 
   <div class="video-loading" ng-if="playerState==STATE_LOADING">
@@ -25,7 +28,20 @@
       </circle>
     </svg>
   </div>
-  <div class="video-close" ng-class="{active:mouseActive}">
-    <a href ng-click="$stop()"><span class="icon icon-cross"></span></a>
+
+  <div class="video-overlay" ng-class="{active:(playerState!=STATE_PLAYING||mouseActive||playerType==CHROMECAST_PLAYER)}">
+    <div class="video-overlay-title" ng-hide="minified">
+      <h3>{{activeMedia.file.name}}</h3>
+      <div class="text-muted">
+        <span class="inline-item"><span class="icon icon-clock"></span> {{activeMedia.meta.duration|hhmmss}}</span>
+        <span class="inline-item"><span class="icon icon-info"></span> {{activeMedia.meta.format}}</span>
+        <span class="inline-item"><span class="icon icon-drive"></span> {{activeMedia.file.size|bytes}}</span>
+      </div>
+    </div>
+
+    <div class="video-overlay-actions">
+      <a class="video-btn" href ng-click="$minify()"><span class="icon" ng-class="minified?'icon-circle-up':'icon-circle-down'"></span></a>
+      <a class="video-btn" href ng-click="$stop()" ng-hide="minified"><span class="icon icon-cross"></span></a>
+    </div>
   </div>
 </div>

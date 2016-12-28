@@ -1,8 +1,13 @@
 
-
+var util = require('util');
 const _hhmmss = require("hh-mm-ss");
 
 angular.module('ec.filters',[])
+.filter('bgImage',function(){
+  return function(input){
+    return input ? {'background-image': util.format("url(\"file://%s\")", input)} : {};
+  }
+})
 .filter('noSrc',function(){
   return function(input){
     return input ? input : '';

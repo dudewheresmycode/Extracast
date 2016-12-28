@@ -1,0 +1,96 @@
+{
+  "media": [
+    {
+      "id": "BkK6X6xrl",
+      "file": {
+        "name": "Indiana.Jones.And.The.Last.Crusade.1989.720p.BluRay.x264.YIFY.mp4",
+        "path": "/Volumes/USB30FD/Features/Indiana Jones and the Last Crusade (1989)/Indiana.Jones.And.The.Last.Crusade.1989.720p.BluRay.x264.YIFY.mp4",
+        "size": 840095771
+      },
+      "meta": {
+        "format": "QuickTime / MOV",
+        "duration": 7613,
+        "size": 840095771
+      },
+      "thumbnails": {
+        "full": "/Users/addroid/Library/Application Support/Extracast/t-hd-BkK6X6xrl-a979cf40-ccb8-11e6-b8a9-7ba930fdbd78.jpg",
+        "square": "/Users/addroid/Library/Application Support/Extracast/t-sq-BkK6X6xrl-a979cf41-ccb8-11e6-b8a9-7ba930fdbd78.jpg"
+      }
+    },
+    {
+      "id": "SJztvaxSl",
+      "file": {
+        "name": "Tremors (1990).mp4",
+        "path": "/Volumes/USB30FD/Features/Tremors (1990).mp4",
+        "size": 3125433123
+      },
+      "meta": {
+        "format": "QuickTime / MOV",
+        "duration": 5745,
+        "size": 3125433123
+      },
+      "thumbnails": {
+        "full": "/Users/addroid/Library/Application Support/Extracast/t-hd-SJztvaxSl-e1cef940-ccba-11e6-b931-8b939eb2e8a8.jpg",
+        "square": "/Users/addroid/Library/Application Support/Extracast/t-sq-SJztvaxSl-e1cf2050-ccba-11e6-b931-8b939eb2e8a8.jpg"
+      }
+    },
+    {
+      "id": "B1Ytwaxrg",
+      "file": {
+        "name": "Willy.Wonka.&.the.Chocolate.Factory.1971.1080p.BrRip.720p.x264.YIFY.mp4",
+        "path": "/Volumes/USB30FD/Features/Willy Wonka & the Chocolate Factory (1971) [1080p]/Willy.Wonka.&.the.Chocolate.Factory.1971.1080p.BrRip.720p.x264.YIFY.mp4",
+        "size": 1348291576
+      },
+      "meta": {
+        "format": "QuickTime / MOV",
+        "duration": 5985,
+        "size": 1348291576
+      },
+      "thumbnails": {
+        "full": "/Users/addroid/Library/Application Support/Extracast/t-hd-B1Ytwaxrg-e5e5e110-ccba-11e6-b931-8b939eb2e8a8.jpg",
+        "square": "/Users/addroid/Library/Application Support/Extracast/t-sq-B1Ytwaxrg-e5e5e111-ccba-11e6-b931-8b939eb2e8a8.jpg"
+      }
+    },
+    {
+      "id": "SkQ5Dagrl",
+      "file": {
+        "name": "Blazing.Saddles.1974.1080p.BluRay.x264.YIFY.mp4",
+        "path": "/Volumes/USB30FD/Features/Blazing Saddles (1974)/Blazing.Saddles.1974.1080p.BluRay.x264.YIFY.mp4",
+        "size": 1550314086
+      },
+      "meta": {
+        "format": "QuickTime / MOV",
+        "duration": 5572,
+        "size": 1550314086
+      },
+      "thumbnails": {
+        "full": "/Users/addroid/Library/Application Support/Extracast/t-hd-SkQ5Dagrl-ebfb30f0-ccba-11e6-b931-8b939eb2e8a8.jpg",
+        "square": "/Users/addroid/Library/Application Support/Extracast/t-sq-SkQ5Dagrl-ebfb30f1-ccba-11e6-b931-8b939eb2e8a8.jpg"
+      }
+    },
+    {
+      "id": "BkH0qpxHg",
+      "file": {
+        "name": "Robin Hood Men in Tights (1993).mp4",
+        "path": "/Volumes/USB30FD/Features/Robin Hood Men in Tights (1993)/Robin Hood Men in Tights (1993).mp4",
+        "size": 1391872267
+      },
+      "meta": {
+        "format": "QuickTime / MOV",
+        "duration": 6262,
+        "size": 1391872267
+      },
+      "thumbnails": {
+        "full": "/Users/addroid/Library/Application Support/Extracast/t-hd-BkH0qpxHg-dd1779c0-ccbc-11e6-8bf3-252ed4d9c1c4.jpg",
+        "square": "/Users/addroid/Library/Application Support/Extracast/t-sq-BkH0qpxHg-dd1779c1-ccbc-11e6-8bf3-252ed4d9c1c4.jpg"
+      }
+    }
+  ],
+  "config": {
+    "video": {
+      "bitrate": 1200,
+      "size": "720",
+      "port": 3130
+    }
+  }
+}

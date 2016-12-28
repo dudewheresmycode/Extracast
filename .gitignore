@@ -1,6 +1,5 @@
 node_modules
-tmp
-ffmpeg_build
 db.json
 releases
 tests
+app/ffmpeg-bundle

@@ -15,18 +15,20 @@ const fs = require('fs')
 
 const transcoder = require('./lib/transcoder.js')
 
+app.setPath("appData", (app.getPath("appData")+'/Extracast'));
+
 transcoder.on('progress', function(params){
   mainWindow.webContents.send("ffmpeg-update", params);
 })
 const ipcMain = electron.ipcMain;
-let ffnag;
+//let ffnag;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 ipcMain.on('quit-it-all', function(event) {
   console.log("QUIT!");
-  if(ffnag) ffnag.destroy();
+  //if(ffnag) ffnag.destroy();
   if(app) app.quit();
   event.returnValue = 'killed'
 });
@@ -43,16 +45,17 @@ ipcMain.on("transcode.stop", function(event){
   transcoder.kill();
   event.returnValue = 'killed'
 });
-ipcMain.on('transcode.stream', function(event,options){
+
+ipcMain.on('transcode.stream', function(event, options, stream){
   //console.log(params);
   // var outputFile = app.getPath("temp")+"/stream.webm";
   // var writer = new streams.WritableStream();
   // var reader = new streams.ReadableStream();
   console.log("STREAM", options);
   //_cache = new Buffer("", "binary")
-  transcoder.stream(options, function(){
+  transcoder.stream(options, function(err,stream){
     console.log("READY");
-    event.sender.send('transcode.ready', options)
+    event.sender.send('transcode.ready', options, stream)
   });
 
 })
@@ -81,21 +84,22 @@ function createWindow () {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools()
-  mainWindow.on('show', function(){
+  // mainWindow.on('show', function(){
+  //
+  //   //if ffmpeg not installed
+  //   if(!transcoder.exists()){
+  //
+  //     ffnag = new BrowserWindow({parent: mainWindow, width: 500, height: 300, modal: true, show: true})
+  //
+  //     ffnag.loadURL(url.format({
+  //       pathname: path.join(__dirname, 'client/html/tpl/install-ffmpeg.html'),
+  //       protocol: 'file:',
+  //       slashes: true
+  //     }))
+  //   }
+  //
+  // })
 
-    //if ffmpeg not installed
-    if(!transcoder.exists()){
-
-      ffnag = new BrowserWindow({parent: mainWindow, width: 500, height: 300, modal: true, show: true})
-
-      ffnag.loadURL(url.format({
-        pathname: path.join(__dirname, 'client/html/install-ffmpeg.html'),
-        protocol: 'file:',
-        slashes: true
-      }))
-    }
-
-  })
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
     // Dereference the window object, usually you would store windows

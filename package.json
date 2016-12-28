@@ -1,35 +1,30 @@
 {
   "name": "extracast",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A rock solid, cross platform desktop application for streaming to your Chromecast.",
   "main": "app/main.js",
   "scripts": {
-    "postinstall": "npm rebuild --runtime=electron --target=1.4.1 --disturl=https://atom.io/download/atom-shell --abi=50",
-    "start": "electron ."
+    "postinstall": "grunt ffmpeg --target=auto && cd ./app && npm install",
+    "start": "electron ./app"
   },
   "keywords": [],
   "repository": "https://github.com/dudewheresmycode/Extracast",
   "author": "dudewheresmycode",
-  "license": "MIT",
+  "license": "GNU",
   "devDependencies": {
     "electron": "^1.4.1",
     "grunt": "^1.0.1",
+    "grunt-contrib-clean": "^1.0.0",
+    "grunt-contrib-cssmin": "^1.0.2",
+    "grunt-contrib-less": "^1.4.0",
+    "grunt-contrib-uglify": "^2.0.0",
     "grunt-electron": "^5.0.0",
-    "load-grunt-tasks": "^3.5.2"
+    "load-grunt-tasks": "^3.5.2",
+    "shortid": "^2.2.6"
   },
   "dependencies": {
-    "angular": "^1.6.0",
-    "bootstrap": "^4.0.0-alpha.5",
-    "castv2-client": "^1.1.2",
-    "ffbinaries": "^0.1.2",
-    "ffmpeg-parse": "*",
-    "hh-mm-ss": "^1.1.0",
-    "jquery": "^3.1.1",
-    "lowdb": "^0.14.0",
-    "mdns": "^2.3.3",
-    "moment": "^2.17.1",
-    "sharp": "^0.17.0",
-    "shortid": "^2.2.6",
-    "stream-transcoder": "https://github.com/dudewheresmycode/stream-transcoder.js"
+    "angular-animate": "^1.6.1",
+    "bigscreen": "^2.0.5",
+    "tether": "^1.4.0"
   }
 }

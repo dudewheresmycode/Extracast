@@ -1,6 +1,7 @@
 //var chromecast = require('./electron-cast.js');
 var util = require('util');
 const ipc = require('electron').ipcRenderer
+const app = require('electron').remote.app;
 
 const Client                = require('castv2-client').Client
 const DefaultMediaReceiver  = require('castv2-client').DefaultMediaReceiver
@@ -10,9 +11,11 @@ const mdns                  = require('mdns')
 const shortid = require("shortid");
 const low = require("lowdb");
 
-const lowdb = low('db.json')
+
+
+const lowdb = low(app.getAppPath()+'/extracast-config.json');
 //const lowdb = low()
-lowdb.defaults({ media: [], config:{video:{bitrate:1200, size:"720", port:3130}}}).value()
+lowdb.defaults({ media: [], config:{video:{bitrate:1200, size:"720", port:3130}}}).value();
 
 const hhmmss = require("hh-mm-ss");
 
@@ -20,12 +23,13 @@ const hhmmss = require("hh-mm-ss");
 let client = new Client();
 
 angular.module('ec.providers',[])
+
 .provider('$ecPlayerStatus',function(){
   var self = this;
 
   this.$get = function($rootScope){
     var that = this;
-    that._status = {playing:false, currentTime:0, state:$rootScope.STATE_PLAYING, type:$rootScope.LOCAL_PLAYER};
+    that._status = {playing:false, currentTime:0, state:$rootScope.STATE_STOPPED, type:$rootScope.LOCAL_PLAYER};
 
     return {
       set: function(key,val){
@@ -33,6 +37,9 @@ angular.module('ec.providers',[])
       },
       get: function(key){
         return that._status[key];
+      },
+      state: function(){
+        return that._status.state;
       },
       status: function(){
         return that._status;
@@ -76,11 +83,11 @@ angular.module('ec.providers',[])
 
     var that = this;
 
-    ipc.on('transcode.ready', function(event,item){
+    ipc.on('transcode.ready', function(event, item, stream){
       console.log("READY");
       if($rootScope.playerType==$rootScope.LOCAL_PLAYER){
         console.log("LOCAL START");
-        $rootScope.$emit('player.start', item);
+        $rootScope.$emit('player.start', item, stream);
         $rootScope.$apply();
       }else if($rootScope.playerType==$rootScope.CHROMECAST_PLAYER){
         $chromecast.start(item);
@@ -99,6 +106,9 @@ angular.module('ec.providers',[])
         console.log("START");
         $rootScope.$emit('player.start', item);
         that._playing=true;
+      },
+      fullscreen: function(){
+        $rootScope.$emit('player.fullscreen');
       },
       pause: function(){
         console.log("IS PLAYING", that._playing)
@@ -204,9 +214,16 @@ angular.module('ec.providers',[])
   self._playing = false;
   self._connected = false;
 
+  // $rootScope.CHROMECAST_IDLE = 1;
+  // $rootScope.CHROMECAST_CONNECTING = 2;
+  // $rootScope.CHROMECAST_CONNECTED = 3;
+
+
 
   this.$get = function($q,$rootScope,$ecConfig,$media){
     var that = this;
+
+    that._state = $rootScope.CHROMECAST_IDLE;
 
     that.browser = mdns.createBrowser(mdns.tcp('googlecast'));
     that.browser.on('serviceUp', function(service) {
@@ -248,6 +265,7 @@ angular.module('ec.providers',[])
       that._player = null;
       $rootScope.playerType=$rootScope.LOCAL_PLAYER;
       that._connected=false;
+      that._state = $rootScope.CHROMECAST_IDLE;
       //$rootScope.$apply();
     }
 
@@ -255,6 +273,7 @@ angular.module('ec.providers',[])
       that._player = player;
       $rootScope.playerType=$rootScope.CHROMECAST_PLAYER;
       that._connected=true;
+      that._state = $rootScope.CHROMECAST_CONNECTED;
 
       console.log('app "%s" launched', that._player.session.displayName);
 
@@ -292,6 +311,9 @@ angular.module('ec.providers',[])
       isPlaying: function(){
         return that._playing;
       },
+      state: function(){
+        return that._state;
+      },
       isConnected: function(){
         return that._connected;
       },
@@ -311,7 +333,9 @@ angular.module('ec.providers',[])
 
         that._getIpAddress(function(err,addr){
           var port = $ecConfig.get("video").port;
+
           var streamUrl = util.format("http://%s:%s/stream.mp4", addr, port);
+
           console.log('port: %s, addr: %s', port, streamUrl);
 
           var media = {
@@ -327,7 +351,8 @@ angular.module('ec.providers',[])
               duration: $rootScope.activeMedia.meta.duration,
               title: $rootScope.activeMedia.file.name,
               images: [
-                { url: $rootScope.activeMedia.thumbnail }
+                { name:"lg", url: util.format("http://%s:%s/thumbs_lg.jpg", addr, port) },
+                { name:"sm", url: util.format("http://%s:%s/thumbs_sm.jpg", addr, port) }
               ]
             }
           };
@@ -372,6 +397,9 @@ angular.module('ec.providers',[])
         //session.stop(that._player.session);
       },
       connect: function(host){
+
+        that._state = $rootScope.CHROMECAST_CONNECTING;
+
         var defer = $q.defer();
         //client.connect(host, function() {
           console.log('connected!, launching app ...');

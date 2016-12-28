@@ -1,0 +1,78 @@
+
+.context,
+.dropdown {
+  position: relative;
+  box-sizing: border-box;
+}
+
+.dropdown > a {
+  position: relative;
+}
+
+
+.dropdown.dropdown-icon > a:after {
+  content: '';
+  border-left: 5px solid transparent;
+  border-bottom: 5px solid #eee;
+  border-right: 5px solid transparent;
+  display: inline-block;
+  position: absolute;
+  top:50%;
+  right: -0.5em;
+}
+
+.context .context-menu {
+  margin-top: 5px;
+  background: #000;
+  display: none;
+  position: fixed;
+  min-width: 200px;
+  min-height: 200px;
+  box-shadow: 1px 0px 5px rgba(0,0,0,0.5);
+}
+.dropdown .dropdown-menu {
+  background: #000;
+  display: none;
+  position: absolute;
+  box-sizing: border-box;
+  min-width: 200px;
+  right: 0px;
+  bottom: 0px;
+  box-shadow: 1px 0px 5px rgba(0,0,0,0.5);
+}
+.context .context-menu {
+  position: fixed;
+}
+
+.dropdown.dropup .dropdown-menu {
+  bottom: 0px;
+  margin-bottom: 40px;
+}
+.context.open .context-menu,
+.dropdown.open .dropdown-menu {
+  display: block;
+  box-sizing: border-box;
+}
+
+.dropdown .dropdown-menu.dropdown-menu-right {
+  right: 0px;
+}
+
+.context .context-menu .dropdown-item,
+.dropdown .dropdown-menu .dropdown-item {
+  display: flex;
+  padding: 15px;
+  box-sizing: border-box;
+  align-items: center;
+  border-bottom: 1px solid #111;
+}
+
+.context .context-menu .dropdown-item .icon,
+.dropdown.open .dropdown-menu .dropdown-item .icon {
+  margin-right: 0.5em;
+}
+.context .context-menu .dropdown-item:hover,
+.dropdown .dropdown-menu .dropdown-item:hover {
+  background-color: #077A4A;
+  /*background-color: rgba(100,100,100,0.25);*/
+}

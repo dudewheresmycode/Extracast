@@ -1,0 +1,8 @@
+{
+  "name": "grunt-ffmpeg-bundle",
+  "main": "index.js",
+  "version": "0.0.1",
+  "dependencies": {
+    "ffbinaries": "^0.1.2"
+  }
+}

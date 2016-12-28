@@ -1,0 +1,71 @@
+
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top:0px;
+  bottom: 0px;
+  left:0px;
+  right: 0px;
+}
+.app-titlebar {
+  text-align: center;
+  line-height: 40px;
+  height: 40px;
+  -webkit-app-region: drag;
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+}
+
+.app-player-controls {
+  height: 90px;
+  background: #1d2020;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  /*
+  border-top: 1px solid #101010;
+  box-shadow: inset 0px 1px #555555;
+  position: fixed;
+  bottom: 0px;
+  left:0px;
+  right:0px;
+  height:90px;*/
+}
+
+.app-view {
+  height: calc( 100% - 90px);
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: auto;
+}
+.app-sidebar {
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: auto;
+  min-width: 100px;
+  width: 250px;
+  max-width: 400px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  justify-content: flex-start;
+  text-align: left;
+  /*background-color: #202020;*/
+}
+.container {
+  padding: 15px;
+}
+.app-main {
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /*background-color: #1d2020;*/
+  background: rgba(100,100,100,0.10);
+}

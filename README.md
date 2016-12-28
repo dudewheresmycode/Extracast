@@ -14,7 +14,7 @@ If you want to contribute, or just tinker with the project, you'll need [Git](ht
 ```bash
   # Clone this repository
   git clone https://github.com/dudewheresmycode/Extracast
-  # Install
+  # Install dependencies
   npm install
   # Run the app
   npm start

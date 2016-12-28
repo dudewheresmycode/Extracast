@@ -3,17 +3,11 @@ var $ = jQuery = require('jquery');
 var util = require('util');
 var ipc = require('electron').ipcRenderer;
 var moment = require('moment');
+var BigScreen = require('bigscreen');
 
 
 
 angular.module('ec.directives',[])
-.directive('optionInput',function(){
-  return {
-    link: function(){
-
-    }
-  }
-})
 .directive('sliderInput',function($media,$timeout){
   return {
     restrict: 'E',
@@ -98,6 +92,7 @@ angular.module('ec.directives',[])
       //scope.activeMedia = function(){ return $rootScope.activeMedia; }
       scope._activeMedia = function(){ return $rootScope.activeMedia; }
 
+
       scope.currentPlayer = function(){
         if($rootScope.playerType==$rootScope.LOCAL_PLAYER)
          return $player;
@@ -117,6 +112,11 @@ angular.module('ec.directives',[])
           scope.currentTime = time + $rootScope.seekOffset;
         }
       });
+
+      scope.$fullscreen = function(){
+        if($rootScope.playerType==$rootScope.LOCAL_PLAYER)
+          $player.fullscreen();
+      }
 
       scope.$seek = function(percent){
         $rootScope.isSeeking=true;
@@ -147,9 +147,14 @@ angular.module('ec.directives',[])
     link: function(scope,ele,attr){
 
       scope._isc = function(){ return $chromecast.isConnected(); }
+      scope._state = function(){ return $chromecast.state(); }
       scope.castIcon = function(){
-        return util.format("../images/chromecast-icons/%s.png", (scope._isc() ? "ic_cast_connected_blue_24dp" : "ic_cast_white_24dp"));
+        return util.format("../images/chromecast/%s_24dp.svg", ["ic_cast","ic_cast_anim","ic_cast_connected"][scope._state()]);
       }
+      scope.castIconClass = function(){
+        return ["","connecting","connected"][scope._state()];
+      }
+
       scope.devices = function(){
         return $chromecast.list();
       };
@@ -158,6 +163,7 @@ angular.module('ec.directives',[])
       //   console.log(d);
       // });
       scope.$disconnect = function(){
+        if($ecPlayerStatus.state()!=$rootScope.STATE_STOPPED) $chromecast.stop();
         $chromecast.disconnect();
       }
       scope.$connect = function(device){
@@ -173,7 +179,14 @@ angular.module('ec.directives',[])
 //            $rootScope.activeMedia = null;
             ipc.sendSync("transcode.stop");
             $player.stop();
-            ipc.send("transcode.stream", {inputFile:$rootScope.activeMedia.file.path, duration:$rootScope.activeMedia.meta.duration, seek:ctime, vopts:$ecConfig.get("video")});
+            ipc.send("transcode.stream", {
+              inputFile:$rootScope.activeMedia.file.path,
+              thumbnails:$rootScope.activeMedia.thumbnails,
+              duration:$rootScope.activeMedia.meta.duration,
+              seek:ctime,
+              http_stream:($rootScope.playerType == $rootScope.CHROMECAST_PLAYER),
+              vopts:$ecConfig.get("video")
+            });
           }
 
         });
@@ -199,9 +212,14 @@ angular.module('ec.directives',[])
       scope.mouseActive = true;
       scope._mouse = {current:[],last:[]};
 
-      $(window)
+      var bind_keys = function(){
+        $(window).on('keypress',function(e){
+          console.log(e.which);
+        });
+      }
+
+      $(ele)
         .on('mousemove',function(e){
-          console.log('move');
           scope.mouseActive = true;
           scope._mouse.current = [e.clientX,e.clientY];
           $timeout.cancel(scope._dtimer);
@@ -211,9 +229,7 @@ angular.module('ec.directives',[])
         });
 
       function _defer(){
-        console.log('time');
         if(angular.equals(scope._mouse.last,scope._mouse.current)){
-          console.log('same!');
           scope.mouseActive = false;
         }
       }
@@ -239,8 +255,15 @@ angular.module('ec.directives',[])
         $rootScope.$emit('player.timechange', scope.videoEle.currentTime);
         $rootScope.$apply();
       });
-      scope.start = function(){
-        $(scope.videoEle).prop("src", "http://localhost:3130/stream.mp4");
+
+      scope.$minify = function(){
+        scope.minified=!scope.minified;
+      }
+
+      scope.start = function(stream){
+        //$(scope.videoEle).prop("src", "http://localhost:3130/stream.mp4");
+        console.log("PLAY", stream)
+        $(scope.videoEle).prop("src", stream);
         scope.videoEle.load();
         $rootScope.isSeeking=false;
       }
@@ -260,12 +283,32 @@ angular.module('ec.directives',[])
           scope._stop();
         //$chromecast.stop();
       }
+      $rootScope.$on('player.fullscreen', function(evt){
 
+        if (BigScreen.enabled) {
+            BigScreen.toggle();
+            BigScreen.request(ele[0], function(){ console.log("enter"); }, function(){ console.log("exit"); }, function(e){ console.log("err",e); });
+        }
+        else {
+            // fallback
+        }
+        // console.log("FULL");
+        // if (ele[0].webkitRequestFullscreen) {
+        //   console.log("GO FULL");
+        //   ele[0].webkitRequestFullscreen();
+        // }
+      });
       $rootScope.$on('player.seek', function(evt,s){
         scope.videoEle.pause();
         $(ele).prop("src", "");
         ipc.sendSync("transcode.stop");
-        ipc.send("transcode.stream", {inputFile:$rootScope.activeMedia.file.path,duration:$rootScope.activeMedia.meta.duration, seek:s, vopts:$ecConfig.get("video")});
+        ipc.send("transcode.stream", {
+          inputFile:$rootScope.activeMedia.file.path,
+          thumbnails:$rootScope.activeMedia.thumbnails,
+          duration:$rootScope.activeMedia.meta.duration,
+          http_stream:($rootScope.playerType == $rootScope.CHROMECAST_PLAYER),
+          seek:s, vopts:$ecConfig.get("video")
+        });
         scope.start();
       });
       scope._pauseTime = 0;
@@ -277,78 +320,156 @@ angular.module('ec.directives',[])
       $rootScope.$on('player.resume',function(evt){
         console.log(scope._pauseTime);
         $rootScope.seekOffset = scope._pauseTime;
-        ipc.send("transcode.stream", {inputFile:$rootScope.activeMedia.file.path,duration:$rootScope.activeMedia.meta.duration, seek:scope._pauseTime, vopts:$ecConfig.get("video")});
+        ipc.send("transcode.stream", {
+          inputFile:$rootScope.activeMedia.file.path,
+          thumbnails:$rootScope.activeMedia.thumbnails,
+          duration:$rootScope.activeMedia.meta.duration,
+          http_stream:($rootScope.playerType == $rootScope.CHROMECAST_PLAYER),
+          seek:scope._pauseTime,
+          vopts:$ecConfig.get("video")
+      });
         scope.start();
       })
       $rootScope.$on('player.stop', function(evt,file){
         scope._stop();
       });
-      $rootScope.$on('player.start', function(evt,file){
+      $rootScope.$on('player.start', function(evt,file,stream){
         //$rootScope.videoActive = true;
         $rootScope.playerState=$rootScope.STATE_LOADING;
         console.log("PLAY", evt,file);
-        scope.start();
+        scope.start(stream);
       });
     }
   }
 })
-.directive('mediaList',function($rootScope,$timeout,$chromecast,$ecConfig,$player,$media){
+.directive('contextGroup', function(){
+  return {
+    //scope: {},
+    link: function(scope,ele,attr){
+      scope.contextVisible = false;
+      scope.position = [0,0];
+      scope.selectedMedia = null;
+      scope.contextStyle = function(){
+        return {top:scope.position[1]+'px',left:scope.position[0]+'px'};
+      }
+      scope.item_play = function(){
+        console.log("$PLAY", scope.selectedMedia);
+        scope.$play(scope.selectedMedia);
+      }
+
+      $(window).on('click',function(e){
+        scope.contextVisible = false;
+        scope.$apply();
+      });
+
+
+    }
+  }
+})
+
+.directive('contextRow', function($parse){
+  return {
+    //scope:{contextRow:'='},
+    link: function(scope,ele,attr){
+      //scope.item = scope.contextRow;
+      //scope._visible = false;
+      var item = $parse(attr.contextRow)(scope);
+      // scope.item_play = function(){
+      //   console.log("$PLAY", item);
+      //   scope.$parent.$play(item);
+      // }
+
+      $(ele).on('mousedown',function(event){
+        if(event.which==3){
+          scope.$parent.selectedMedia = item;
+          scope.$parent.selected = item.id;
+          var maxX = $(window).width() - $(ele).parent().find('.context-menu').outerWidth();
+          var cx = event.pageX > maxX ? maxX : event.pageX;
+          console.log(maxX, cx);
+          scope.$parent.position = [cx,event.pageY];
+          scope.$parent.contextVisible = true;
+          //$(ele).find('.context-menu').addClass('open');
+          console.log("Context", event, scope.$parent.position);
+          event.preventDefault();
+          event.stopPropagation();
+          scope.$apply();
+        }
+      });
+
+    }
+  }
+})
+.directive('mediaList',function($rootScope,$filter,$timeout,$chromecast,$ecConfig,$player,$media){
   return {
     scope: {},
     replace:true,
     templateUrl: 'tpl/dir.media-list.html',
     link: function(scope,ele,attr){
 
+      scope._activeMedia = function(){ return $rootScope.activeMedia; }
 
+      scope.$context = function($event){
+        var t = $event.target.localName=='span' ? $event.target.parentNode : $event.target;
+        console.dir(t);
+        //$(t).dropdown('show');
+        //$event.preventDefault();
+        $event.stopPropagation();
+      }
+      scope.$select = function(item){
+        scope.selected = item.id;
+      }
       scope.$play = function(item){
         console.log("PLAY", item);
-        // var _start = function(){
-        //   $rootScope.playerType=LOCAL_PLAYER;
-        //   console.log("play locally");
-        //   $player.start(item);
-        // }
-        //
-        // if($chromecast.isConnected()){
-        //   _start = function(){
-        //     //play on chromecast
-        //     console.log("play on chromecast");
-        //     $rootScope.playerType=CHROMECAST_PLAYER;
-        //     $chromecast.play(item);
-        //   }
-        // }else{
-        //   $rootScope.videoActive = true;
-        // }
+        scope.selected = item.id
         $rootScope.activeMedia = item;
         $rootScope.seekOffset = 0;
         $rootScope.playerType = $chromecast.isConnected() ? $rootScope.CHROMECAST_PLAYER : $rootScope.LOCAL_PLAYER
         //start transcode
-        ipc.send("transcode.stream", {inputFile:item.file.path, duration:item.meta.duration, seek:0, vopts:$ecConfig.get("video")});
+        var isStream = $rootScope.playerType == $rootScope.CHROMECAST_PLAYER;
+        ipc.send("transcode.stream", {
+          thumbnails:$rootScope.activeMedia.thumbnails,
+          inputFile:item.file.path,
+          duration:item.meta.duration,
+          http_stream:($rootScope.playerType == $rootScope.CHROMECAST_PLAYER),
+          vopts:$ecConfig.get("video")
+        });
 
       }
       scope.list = function(){
-        return $media.list();
+        return $filter('orderBy')($media.list(), 'file.name');
       }
     }
   }
 })
-.directive('mediaSelect',function($chromecast,$rootScope,$media,$timeout){
-  return {
-    replace: true,
-    template: '<a class="btn btn-primary" href ng-click="_click()">Import File</a>',
-    link: function(scope,ele,attr){
-      var file = document.createElement('input');
-      file.type = 'file';
-      file.accept = '.mp4,.mov,.avi,.mpg,.mkv,.webm,.moov,.mpeg,.m4v,.mpg4,video/*';
-      //scope.currentFile = function(){ return $media.get(); }
-
-      file.addEventListener('change',function(e){
-        $media.add(e.target.files[0]);
-      });
-
-
-      scope._click = function(){
-        file.click();
-      }
-    }
-  }
-})
+// .directive('mediaSelect',function($chromecast,$rootScope,$media,$timeout){
+//   return {
+//     replace: true,
+//     template: '<a id="openMedia" class="btn btn-primary" href ng-click="_click()">Import File</a>',
+//     link: function(scope,ele,attr){
+//
+//       ipc.on("media.select", function(evt,file){
+//         console.log("SELECT!", file);
+//         file.forEach(function(f){
+//           $media.add(f);
+//         })
+//       });
+//
+//       var file = document.createElement('input');
+//       file.type = 'file';
+//       file.multiple = true;
+//       file.accept = '.mp4,.mov,.avi,.mpg,.mkv,.webm,.moov,.mpeg,.m4v,.mpg4,video/*';
+//       //scope.currentFile = function(){ return $media.get(); }
+//
+//       file.addEventListener('change',function(e){
+//         for(var i=0;i<e.target.files.length;i++){
+//           $media.add(e.target.files[i]);
+//         }
+//       });
+//
+//
+//       scope._click = function(){
+//         file.click();
+//       }
+//     }
+//   }
+// })

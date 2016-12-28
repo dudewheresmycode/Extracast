@@ -6,7 +6,9 @@
     <!-- <link rel="stylesheet" type="text/css" href="../../node_modules/bootstrap/dist/css/bootstrap-reboot.min.css" /> -->
     <link rel="stylesheet" type="text/css" href="../styles/sf-font/font.css" />
     <link rel="stylesheet" type="text/css" href="../styles/icomoon/style.css" />
-    <link rel="stylesheet" type="text/css" href="../styles/app.css" />
+    <link rel="stylesheet" type="text/css" href="../dist/css/extracast.min.css" />
+    <!-- <link rel="stylesheet" href="../styles/less/base.less" /> -->
+
   </head>
   <body ng-app="extracast" ng-controller="main">
 
@@ -14,11 +16,34 @@
     <div class="app-container">
 
       <div class="app-titlebar">
+        Extracast
       </div>
 
       <div class="app-view">
         <div class="app-sidebar">
-          <div option-input data-key="video.size"></div>
+
+          <div class="list-group list-group-sidebar">
+            <a class="list-group-item active"><div><span class="icon icon-book"></span> Media Library</div></a>
+
+            <!-- <li class="list-group-separator"></li> -->
+            <a class="list-group-heading">Apps</a>
+            <a class="list-group-item"><div><span class="icon icon-music"></span> Pandora</div></a>
+
+            <!-- Maybe someday -->
+            <!-- <a class="list-group-item"><span class="icon icon-book"></span> Netflix</li> -->
+
+            <div class="list-group-heading">
+              Playlists
+            </div>
+            <a class="list-group-item"><div><span class="icon icon-folder"></span> Playlist 1</div></a>
+            <a class="list-group-item"><div><span class="icon icon-folder"></span> Playlist 1</div></a>
+            <a class="list-group-item"><div><span class="icon icon-folder"></span> Playlist 1</div></a>
+            <a class="list-group-item"><div><span class="icon icon-folder"></span> Playlist 1</div></a>
+            <a class="list-group-item"><div><span class="icon icon-folder"></span> Playlist 1</div></a>
+
+
+          </div>
+
 
           <pre>{{status()|json}}</pre>
 
@@ -42,7 +67,7 @@
       // You can also require other files to run in this process
       require('../js/renderer.js')
     </script>
-    <script src="../../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- <script src="../../node_modules/bootstrap/dist/js/bootstrap.min.js"></script> -->
 </body>
 
 </html>

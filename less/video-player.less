@@ -1,0 +1,212 @@
+
+@fade-transition-on: opacity 2s ease-in-out;
+@fade-transition-off: opacity 0.5s ease-in-out;
+
+
+.video-view {
+  position: fixed;
+  left:0;
+  right:0;
+  bottom:90px;
+  top: auto;
+  background: #000000;
+  -webkit-app-region: drag;
+  -webkit-transition: all 500ms ease-in-out;
+  width: 100%;
+  height: calc(~"100% - 90px");
+}
+.video-view.minified {
+  /*right: calc(0 - (100% - 250px));*/
+  /*top: calc(0 - (100% - 140px));*/
+  width: 250px;
+  height: 140px;
+  top: auto;
+  -webkit-app-region: no-drag;
+}
+.video-view .video-splash {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+.video-view .video-splash .video-splash-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  text-align: center;
+}
+.video-view .video-splash .video-splash-icon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: -6vw 0 0 -6vw;
+  opacity: 0.8;
+}
+
+//chromecast-icon
+.video-view .video-splash .video-splash-icon.chromecast-icon svg {
+  width: 12vw;
+  height: 12vw;
+}
+.video-view .video-splash .video-splash-icon.chromecast-icon path {
+  fill: #fff;
+}
+
+.video-view.minified .video-splash .video-splash-icon {
+  margin: -1vw 0 0 -1vw;
+}
+.video-view.minified .video-splash .video-splash-icon.chromecast-icon svg {
+  width: 2vw;
+  height: 2vw;
+}
+
+//
+// .video-view .video-splash-overlay {
+//   position: absolute;
+//   bottom: 20px;
+//   left: 20px;
+//   right: 20px;
+//   padding: 10px;
+//   opacity: 0;
+//   transition: @fade-transition-on;
+// }
+// .video-view .video-splash-overlay.active {
+//   transition: @fade-transition-off;
+//   opacity: 1;
+// }
+// .video-view .video-splash-overlay .video-splash-overlay-content .video-splash-overlay-title {
+//   margin: 0;
+//   padding: 10px 0;
+//   text-overflow: ellipsis;
+//   white-space: nowrap;
+//   overflow: hidden;
+//   font-size: 2em;
+// }
+// .video-view .video-splash-overlay .video-splash-overlay-content .video-splash-overlay-sub {
+//   padding: 10px 0;
+//   font-size: 1.5em;
+//   color: #fff;
+//   width: 100%;
+//   display: block;
+//   overflow: hidden;
+//   text-overflow: ellipsis;
+//   white-space: nowrap;
+//   box-sizing: border-box;
+//   margin: 0;
+// }
+
+.video-view .video-content,
+.video-view .video-content video {
+  background-color: #000000;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.video-view:-webkit-full-screen .video-content video {
+  position: fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height: 100%;
+}
+
+.video-view .video-overlay {
+  position: absolute;
+  top: 20px;
+  box-sizing: border-box;
+  opacity: 0;
+  transition: @fade-transition-on;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+.video-view .video-overlay .video-overlay-title {
+  flex: 1;
+  margin-left: 30px;
+  overflow: hidden;
+  font-size: 1.5vw;
+  opacity: 1;
+
+  transition: 0.5s linear opacity;
+  transition-delay: 0.5s;
+
+  h3 {
+    margin: 0 0 5px 0;
+  }
+  div, h3 {
+    text-overflow: ellipsis;
+  }
+  .text-muted {
+    color: rgba(255,255,255,0.6);
+  }
+}
+
+
+
+// .video-view .video-overlay .video-overlay-title.ng-hide-add,
+// .video-view .video-overlay .video-overlay-title.ng-hide-remove {
+//   transition: 1s linear all;
+// }
+// .video-view .video-overlay .video-overlay-title.ng-hide-add-active,
+// .video-view .video-overlay .video-overlay-title.ng-hide-remove-active {
+//   transition: 0s linear all;
+// }
+
+.video-view .video-overlay .video-overlay-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  margin-left: auto;
+  margin-right: 30px;
+}
+.video-view .video-overlay.active {
+  transition: @fade-transition-off;
+  opacity: 1;
+}
+.video-view .video-overlay a.video-btn {
+  transition: 0.5s linear opacity;
+  transition-delay: 0.5s;
+
+  -webkit-app-region: no-drag;
+  font-size: 3vw;
+  display: inline-block;
+  padding: 20px;
+}
+.video-view.minified .video-overlay {
+  top: 5px;
+}
+.video-view.minified .video-overlay .video-overlay-actions {
+  margin-right: 5px;
+}
+.video-view.minified .video-overlay a.video-btn {
+  font-size: 1.5vw;
+}
+
+.video-view .video-overlay .video-overlay-title.ng-hide,
+.video-view .video-overlay a.video-btn.ng-hide {
+  transition: 0 linear opacity;
+  opacity: 0;
+  transition-delay: 0s;
+}
+
+
+.video-view .video-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -50px;
+  margin-top: -50px;
+}
+.video-view .video-loading svg {
+  width: 100px;
+  height: 100px;
+}
+.video-view .video-loading svg .spinner-track {
+  stroke: rgba(0,0,0,0.5);
+}
+.video-view .video-loading svg .spinner-fill {
+  stroke: #11F2C1;
+}
