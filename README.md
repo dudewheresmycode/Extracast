@@ -3,7 +3,7 @@
 Extracast is a modern, hackable media player.
 
 **Download App**
-Checkout the [latest releases](/dudewheresmycode/Extracast/releases) to download the desktop application.
+Checkout the [latest releases](https://github.com/dudewheresmycode/Extracast/releases) to download the desktop application.
 
 ---
 
