@@ -6,7 +6,7 @@
 
 
     <div class="list-group-art">
-      <img ng-src="{{item.thumbnails.square|loader}}" class="list-group-image" />
+      <img ng-src="{{item|loader}}" class="list-group-image" />
     </div>
     <!-- <span class="icon icon-file-video"></span> -->
     <div class="list-group-content">
@@ -14,9 +14,12 @@
     </div>
 
     <div class="list-group-right">
+      <span class="inline-item"><span class="icon icon-clock"></span> {{item.meta.duration|hhmmss}}</span>
+
+    </div>
+    <div class="list-group-right">
       <div class="list-group-static list-group-sub text-muted">
-        <span class="inline-item"><span class="icon icon-clock"></span> {{item.meta.duration|hhmmss}}</span>
-        <span class="inline-item"><span class="icon icon-info"></span> {{item.meta.format}}</span>
+        <!-- <span class="inline-item"><span class="icon icon-info"></span> {{item.meta.format}}</span> -->
         <span class="inline-item"><span class="icon icon-drive"></span> {{item.file.size|bytes}}</span>
       </div>
 

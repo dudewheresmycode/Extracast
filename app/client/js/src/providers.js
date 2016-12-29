@@ -8,14 +8,19 @@ const DefaultMediaReceiver  = require('castv2-client').DefaultMediaReceiver
 const ECMediaReceiver  = require('../media-receiver.js');
 const mdns                  = require('mdns')
 
-const shortid = require("shortid");
+//const shortid = require("shortid");
+const uuidV1 = require("uuid/v1");
 const low = require("lowdb");
 
 
 
 const lowdb = low(app.getAppPath()+'/extracast-config.json');
 //const lowdb = low()
-lowdb.defaults({ media: [], config:{video:{bitrate:1200, size:"720", port:3130}}}).value();
+lowdb.defaults({
+  config:{video:{limitBitrate:false, bitrate:1200, size:"720", port:3130}},
+  media: [],
+  playlists: []
+}).value();
 
 const hhmmss = require("hh-mm-ss");
 
@@ -29,11 +34,20 @@ angular.module('ec.providers',[])
 
   this.$get = function($rootScope){
     var that = this;
-    that._status = {playing:false, currentTime:0, state:$rootScope.STATE_STOPPED, type:$rootScope.LOCAL_PLAYER};
+    that._status = {
+      paused:false,
+      currentTime:0,
+      seekOffset:0,
+      volume:100,
+      media:null,
+      state:$rootScope.STATE_STOPPED,
+      type:$rootScope.LOCAL_PLAYER
+    };
 
     return {
       set: function(key,val){
-        return that._status[key] = val;
+        that._status[key] = val;
+        if ($rootScope.$root.$$phase != '$apply' && $rootScope.$root.$$phase != '$digest') $rootScope.$apply();
       },
       get: function(key){
         return that._status[key];
@@ -54,9 +68,11 @@ angular.module('ec.providers',[])
 
   this.$get = function($rootScope){
     var that = this;
+
     function _render(){
-      that.config = lowdb.getState().config;
-      $rootScope.$apply();
+      $rootScope.$apply(function(){
+        that.config = lowdb.getState().config;
+      });
     }
 
     return {
@@ -69,17 +85,58 @@ angular.module('ec.providers',[])
         .value();
         _render();
       },
+      all: function(){
+        return that.config;
+      },
       get: function(key){
         return self.config[key];
       }
     }
   }
 })
+.factory('$ecStreamCtl', function($rootScope,$ecPlayerStatus,$ecConfig){
+
+  ipc.on("transcode.stats", function(event,stats){
+    //console.log(event,stats);
+    self.stats = stats;
+  });
+
+  var self = {
+    stop: function(item){
+      ipc.sendSync("transcode.stop");
+    },
+    start: function(item,seek){
+      var opts = {
+        thumbnails:item.thumbnails,
+        inputFile:item.file.path,
+        inputType:item.file.type,
+        playerType: $ecPlayerStatus.get("type"),
+        duration:item.meta.duration,
+        vopts:$ecConfig.get("video")
+      }
+      if(seek){ opts.seek = seek; }
+      ipc.send("transcode.stream", opts);
+    }
+  };
+  return self;
+})
+.factory('audioPlayer', function(){
+  this.audioEle = document.createElement('audio');
+  this.audioEle.autoplay = true;
+
+  var self = {
+    start: function(item){
+      this.audioEle.src = item;
+
+    }
+  };
+  return self;
+})
 .provider("$player", function(){
   var self = this;
 
 
-  this.$get = function($rootScope,$chromecast){
+  this.$get = function($rootScope,$ecPlayerStatus,$chromecast){
 
     var that = this;
 
@@ -90,7 +147,7 @@ angular.module('ec.providers',[])
         $rootScope.$emit('player.start', item, stream);
         $rootScope.$apply();
       }else if($rootScope.playerType==$rootScope.CHROMECAST_PLAYER){
-        $chromecast.start(item);
+        $chromecast.start(item, stream);
       }
     });
 
@@ -109,6 +166,9 @@ angular.module('ec.providers',[])
       },
       fullscreen: function(){
         $rootScope.$emit('player.fullscreen');
+      },
+      volume: function(v){
+        $ecPlayerStatus.set("volume", v);
       },
       pause: function(){
         console.log("IS PLAYING", that._playing)
@@ -134,29 +194,20 @@ angular.module('ec.providers',[])
   self._currentMeta = {};
   self._bufferReady = false;
 
-  self.media = lowdb.getState().media;
+  var state = lowdb.getState();
+  self.media = state.media;
+  self.playlists = state.playlists;
 
-  this.$get = function($rootScope){
+  this.$get = function($rootScope,$ecPlayerStatus){
     var that = this;
 
     function _render(){
-      var state = lowdb.getState()
-      that.media = state.media;
-      $rootScope.$apply();
+      $rootScope.$apply(function(){
+        var state = lowdb.getState()
+        that.media = state.media;
+        that.playlists = state.playlists;
+      });
     }
-
-    // ipc.on('ffmpeg-update', function(event,params){
-    //   that._currentStats = params;
-    //   $rootScope.$apply();
-    //   var time = moment.duration(params.time).as('seconds');
-    //   var sec = hhmmss.toS(params.time);
-    //   console.log(time);
-    //   if(time > 15 && !that._bufferReady){
-    //     that._bufferReady=true;
-    //     $rootScope.$emit('buffer-ready');
-    //   }
-    //
-    // });
 
     ipc.on('transcoder.probe.result', function(event,params){
       console.log("PROBED", event, params);
@@ -167,6 +218,16 @@ angular.module('ec.providers',[])
         size: Math.round(params.meta.format.size)
         //streams:params.meta.streams
       };
+
+      var vstream = params.meta.streams.find(function(it){ return it.codec_type=="video"; });
+      if(vstream){
+        meta.dimensions = {width:vstream.width, height:vstream.height};
+        meta.video_codec = vstream.codec_name;
+      }
+      var astream = params.meta.streams.find(function(it){ return it.codec_type=="audio"; });
+      if(astream){
+        meta.audio_codec = astream.codec_name;
+      }
 
       lowdb.get('media')
       .find({ id: params.fileId })
@@ -179,17 +240,34 @@ angular.module('ec.providers',[])
 
     return {
       add: function(file){
-        var item = { id: shortid.generate(), file:{name:file.name, path:file.path, size:file.size}, meta:{} };
+        var item = { id: uuidV1(), file:angular.copy(file), meta:null };
+        console.log("PUSH!", item);
         lowdb.get('media').push(item).value();
         _render();
-        ipc.send("transcoder.probe.input", {inputFile:file.path, fileId:item.id});
+        ipc.send("transcoder.probe.input", {input:item});
       },
       list: function(){
         return that.media;
       },
+      playlists: function(){
+        return that.playlists;
+      },
+      addPlaylist: function(name){
+        var item = angular.copy({ id: uuidV1(), name:name, created: new Date() });
+        console.log("PUSH!", item);
+        lowdb.get('playlists').push(item).value();
+        _render();
+        return item;
+      },
       set: function(file){
         that._currentFile = file;
         $rootScope.$apply();
+      },
+      findById: function(id){
+        //that._currentFile = that.media.find(function(it){ return it.id==id; });
+        return that.media.find(function(it){ return it.id==id; });
+        //console.log("FILE", that._currentFile);
+        //$rootScope.$apply();
       },
       meta: function(meta){
         that._currentMeta = meta;
@@ -220,7 +298,7 @@ angular.module('ec.providers',[])
 
 
 
-  this.$get = function($q,$rootScope,$ecConfig,$media){
+  this.$get = function($q,$rootScope,$ecConfig,$ecStreamCtl,$ecPlayerStatus,$media){
     var that = this;
 
     that._state = $rootScope.CHROMECAST_IDLE;
@@ -236,10 +314,13 @@ angular.module('ec.providers',[])
             that._castList.push(service);
           }
           if(_sess){
-            client.join(_sess, ECMediaReceiver, function(e,ra){
-              console.log("AREADY ACTIVE",e,ra);
-              that._connected=true;
-              that._postConnect(ra);
+            client.join(_sess, ECMediaReceiver, function(e,player){
+              console.log("AREADY ACTIVE",_sess,player);
+              that._postConnect(player);
+              that._listen();
+              client.getStatus(function(err,status){
+                that._updateStatus(status);
+              });
             });
           }else{
             $rootScope.$apply();
@@ -256,41 +337,68 @@ angular.module('ec.providers',[])
       //callback(null, service);
       //browser.stop();
     });
+
+    // ipc.on("chromeast.quit", function(event){
+    //   //console.log(event,stats);
+    //   if(that._player) that._player.stop();
+    // });
+
+
+
     that.browser.start();
 
     that._start = function(){
 
     }
+    that._updateStatus = function(status){
+      //console.log("STATUS", status);
+      if(status){
+        if(status.media){
+          var mediaId = status.media.customData.media_id;
+          var media = $media.findById(mediaId);
+          $ecPlayerStatus.set('media', media);
+        }
+
+        if(status.customData && status.customData.actualTime){
+          $ecPlayerStatus.set('currentTime', status.customData.actualTime);
+        }
+
+
+        var s = $rootScope.STATE_STOPPED;
+        switch(status.playerState){
+          case 'BUFFERING':
+          case 'PLAYING':
+            s = $rootScope.STATE_PLAYING;
+            break;
+          case 'IDLE':
+            if($ecPlayerStatus.get('state')!=$rootScope.STATE_LOADING){
+              $ecPlayerStatus.set("media", null);
+              s = $rootScope.STATE_STOPPED;
+            }
+            break;
+        }
+        $ecPlayerStatus.set("state", s);
+      }
+    }
     that._postDisconnect = function(){
-      that._player = null;
       $rootScope.playerType=$rootScope.LOCAL_PLAYER;
       that._connected=false;
       that._state = $rootScope.CHROMECAST_IDLE;
+      that._player = null;
       //$rootScope.$apply();
     }
 
     that._postConnect = function(player){
       that._player = player;
-      $rootScope.playerType=$rootScope.CHROMECAST_PLAYER;
+//      $rootScope.playerType=$rootScope.CHROMECAST_PLAYER;
+      $ecPlayerStatus.set("type", $rootScope.CHROMECAST_PLAYER);
+
       that._connected=true;
       that._state = $rootScope.CHROMECAST_CONNECTED;
 
+
       console.log('app "%s" launched', that._player.session.displayName);
 
-      that._player.on('message', function(message) {
-        console.log('status broadcast message=', message);
-      });
-      that._player.on('timeupdate', function(status) {
-        console.log('status broadcast playerState=', status);
-      });
-      that._player.on('status', function(status) {
-        console.log('status broadcast playerState=%s', status.playerState, status);
-        //if(status.playerState=="BUFFERING")
-          //$rootScope.playerState = $rootScope.STATE_LOADING;
-        if(status.playerState=="PLAYING")
-          $rootScope.playerState = $rootScope.STATE_PLAYING;
-
-      });
       $rootScope.$apply();
 
       //that._player.getStatus(function(){});
@@ -300,6 +408,23 @@ angular.module('ec.providers',[])
       //     console.log(s.currentTime);
       //   });
       // },1000);
+    }
+    that._listen = function(){
+      // that._player.on('message', function(message) {
+      //   console.log('status broadcast message=', message);
+      // });
+      // that._player.on('timeupdate', function(status) {
+      //   console.log('status broadcast timeupdate=', status);
+      //   $ecPlayerStatus.set("currentTime", v);
+      // });
+      that._player.on('status', function(status) {
+        that._updateStatus(status);
+        //console.log('status broadcast playerState=%s', status.playerState, status);
+        //if(status.playerState=="BUFFERING")
+          //$rootScope.playerState = $rootScope.STATE_LOADING;
+        //if(status.playerState=="PLAYING") $rootScope.playerState = $rootScope.STATE_PLAYING;
+        //$ecPlayerStatus.set("state", $rootScope.STATE_LOADING);
+      });
     }
 
     that._getIpAddress = function(callback){
@@ -317,39 +442,50 @@ angular.module('ec.providers',[])
       isConnected: function(){
         return that._connected;
       },
-      seek: function(s){
-        ipc.sendSync("transcode.stop");
-        ipc.send("transcode.stream", {
-          inputFile:$rootScope.activeMedia.file.path,
-          duration:$rootScope.activeMedia.meta.duration,
-          seek:s,
-          vopts:$ecConfig.get("video")
+      volume: function(v){
+        console.log("ch-VOL",v);
+        client.setVolume({level:v/100}, function(err,ev){
+          $ecPlayerStatus.set("volume", v);
+          console.log(err,ev);
         });
       },
-      start: function(){
+      seek: function(s){
+        $ecStreamCtl.stop();
+        $ecStreamCtl.start($ecPlayerStatus.get('media'), s);
+        $ecPlayerStatus.set("seekOffset", s);
+        // ipc.sendSync("transcode.stop");
+        // ipc.send("transcode.stream", {
+        //   inputFile:$rootScope.activeMedia.file.path,
+        //   duration:$rootScope.activeMedia.meta.duration,
+        //   seek:s,
+        //   vopts:$ecConfig.get("video")
+        // });
+      },
+      start: function(item,streamUrl){
         that._playing = true;
 
-        $rootScope.playerState=$rootScope.STATE_LOADING;
+        //$rootScope.playerState=$rootScope.STATE_LOADING;
+        $ecPlayerStatus.set('state', $rootScope.STATE_LOADING);
 
         that._getIpAddress(function(err,addr){
           var port = $ecConfig.get("video").port;
 
-          var streamUrl = util.format("http://%s:%s/stream.mp4", addr, port);
+          //var streamUrl = util.format("https://%s.xip.io:%s/stream.mp4", addr.replace(/\./g,"-"), port);
 
-          console.log('port: %s, addr: %s', port, streamUrl);
+          console.log('streamUrl: %s', streamUrl);
 
           var media = {
             // Here you can plug an URL to any mp4, webm, mp3 or jpg file with the proper contentType.
             contentId: streamUrl,
             contentType: 'video/mp4',
             streamType: 'LIVE', // BUFFERED or LIVE
-            customData: {media_id:$rootScope.activeMedia.id},
+            customData: {media_id:$ecPlayerStatus.get('media').id, seek_offet:$ecPlayerStatus.get('seekOffset')},
             //duration: item.meta.duration,
             metadata: {
               type: 0,
               metadataType: 0,
-              duration: $rootScope.activeMedia.meta.duration,
-              title: $rootScope.activeMedia.file.name,
+              duration: $ecPlayerStatus.get('media').meta.duration,
+              title: $ecPlayerStatus.get('media').file.name,
               images: [
                 { name:"lg", url: util.format("http://%s:%s/thumbs_lg.jpg", addr, port) },
                 { name:"sm", url: util.format("http://%s:%s/thumbs_sm.jpg", addr, port) }
@@ -360,10 +496,10 @@ angular.module('ec.providers',[])
 //          console.log('app "%s" launched, loading media %s ...', that._player.session.displayName, media.contentId);
           that._player.load(media, { autoplay: true }, function(err, status) {
             console.log('media loaded playerState=%s', status.playerState);
-            if(status.playerState=="BUFFERING")
-              $rootScope.playerState = $rootScope.STATE_LOADING;
-            if(status.playerState=="PLAYING")
-              $rootScope.playerState = $rootScope.STATE_PLAYING;
+            // if(status.playerState=="BUFFERING")
+            //   $rootScope.playerState = $rootScope.STATE_LOADING;
+            // if(status.playerState=="PLAYING")
+            //   $rootScope.playerState = $rootScope.STATE_PLAYING;
           });
 
 
@@ -375,11 +511,14 @@ angular.module('ec.providers',[])
       //   return that._file;
       // },
       stop: function(){
-        that._playing=false;
+        //that._playing=false;
+        console.log("CHROME STOP!");
         console.log(that._player);
-        that._player.stop(function(){
-          console.log("STOPPED");
-        });
+        if(that._player){
+          that._player.stop(function(){
+            console.log("STOPPED");
+          });
+        }
       },
       pause: function(){
 
@@ -409,7 +548,9 @@ angular.module('ec.providers',[])
               //$rootScope.castConnected = true;
               console.log(player);
               that._postConnect(player);
+              that._listen();
               defer.resolve();
+
 
             });
 

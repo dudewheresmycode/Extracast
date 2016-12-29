@@ -21,35 +21,10 @@
 
       <div class="app-view">
         <div class="app-sidebar">
-
-          <div class="list-group list-group-sidebar">
-            <a class="list-group-item active"><div><span class="icon icon-book"></span> Media Library</div></a>
-
-            <!-- <li class="list-group-separator"></li> -->
-            <a class="list-group-heading">Apps</a>
-            <a class="list-group-item"><div><span class="icon icon-music"></span> Pandora</div></a>
-
-            <!-- Maybe someday -->
-            <!-- <a class="list-group-item"><span class="icon icon-book"></span> Netflix</li> -->
-
-            <div class="list-group-heading">
-              Playlists
-            </div>
-            <a class="list-group-item"><div><span class="icon icon-folder"></span> Playlist 1</div></a>
-            <a class="list-group-item"><div><span class="icon icon-folder"></span> Playlist 1</div></a>
-            <a class="list-group-item"><div><span class="icon icon-folder"></span> Playlist 1</div></a>
-            <a class="list-group-item"><div><span class="icon icon-folder"></span> Playlist 1</div></a>
-            <a class="list-group-item"><div><span class="icon icon-folder"></span> Playlist 1</div></a>
-
-
-          </div>
-
-
-          <pre>{{status()|json}}</pre>
-
+          <sidebar-list></sidebar-list>
         </div>
-        <div class="app-main">
-          <media-list></media-list>
+        <div class="app-main" ui-view>
+          <!-- <media-list></media-list> -->
         </div>
       </div>
 
@@ -62,6 +37,7 @@
         <!-- <player-stats></player-stats> -->
     </div>
 
+    <pre class="debug-screen" ng-if="debug">{{status()|json}}</pre>
 
     <script>
       // You can also require other files to run in this process

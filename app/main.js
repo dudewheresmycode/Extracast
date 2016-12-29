@@ -17,9 +17,9 @@ const transcoder = require('./lib/transcoder.js')
 
 app.setPath("appData", (app.getPath("appData")+'/Extracast'));
 
-transcoder.on('progress', function(params){
-  mainWindow.webContents.send("ffmpeg-update", params);
-})
+// transcoder.on('progress', function(params){
+//   mainWindow.webContents.send("ffmpeg-update", params);
+// })
 const ipcMain = electron.ipcMain;
 //let ffnag;
 
@@ -39,32 +39,7 @@ ipcMain.on('do-install-ffmpeg', function(event) {
     console.log("INSTALLED", installed);
   });
 });
-ipcMain.on("transcode.stop", function(event){
-  console.log("transcode.stop");
-  console.log("KILL FFMPEG");
-  transcoder.kill();
-  event.returnValue = 'killed'
-});
 
-ipcMain.on('transcode.stream', function(event, options, stream){
-  //console.log(params);
-  // var outputFile = app.getPath("temp")+"/stream.webm";
-  // var writer = new streams.WritableStream();
-  // var reader = new streams.ReadableStream();
-  console.log("STREAM", options);
-  //_cache = new Buffer("", "binary")
-  transcoder.stream(options, function(err,stream){
-    console.log("READY");
-    event.sender.send('transcode.ready', options, stream)
-  });
-
-})
-
-ipcMain.on('transcoder.probe.input', function(event,options){
-  transcoder.probe(options, function(err, obj){
-    event.sender.send('transcoder.probe.result', obj);
-  });
-})
 
 
 function createWindow () {
@@ -114,6 +89,10 @@ function createWindow () {
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow)
 
+// app.on('before-quit',function(){
+//   mainWindow.webContents.send("chromecast.quit");
+//   console.log("Quitting...");
+// });
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
   // On OS X it is common for applications and their menu bar

@@ -14,11 +14,15 @@
   "devDependencies": {
     "electron": "^1.4.1",
     "grunt": "^1.0.1",
+    "grunt-aws-s3": "^0.14.5",
     "grunt-contrib-clean": "^1.0.0",
     "grunt-contrib-cssmin": "^1.0.2",
     "grunt-contrib-less": "^1.4.0",
     "grunt-contrib-uglify": "^2.0.0",
     "grunt-electron": "^5.0.0",
+    "grunt-github-releaser": "^0.1.18",
+    "grunt-release": "^0.14.0",
+    "grunt-zip": "^0.17.1",
     "load-grunt-tasks": "^3.5.2",
     "shortid": "^2.2.6"
   },

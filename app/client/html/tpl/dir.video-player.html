@@ -1,24 +1,24 @@
-<div class="video-view" ng-show="activeMedia" ng-class="{minified:minified}">
+<div class="video-view" ng-show="_playerStatus().state!=STATE_STOPPED" ng-class="{minified:minified}">
   <div class="video-splash">
-    <div class="video-splash-bg" ng-style="{'background-image':'url(\'file://'+activeMedia.thumbnails.full+'\')'}"></div>
-    <div class="video-splash-icon chromecast-icon" ng-if="playerType==CHROMECAST_PLAYER" ng-include="'../images/chromecast/ic_cast_connected_24dp.svg'"></div>
+    <div class="video-splash-bg" ng-style="{'background-image':'url(\'file://'+_playerStatus().media.thumbnails.full+'\')'}"></div>
+    <div class="video-splash-icon chromecast-icon" ng-if="_playerStatus().type==CHROMECAST_PLAYER" ng-include="'../images/chromecast/ic_cast_connected_24dp.svg'"></div>
   </div>
 
-  <div class="video-content" ng-show="(playerState==STATE_PLAYING||playerState==STATE_PAUSED) && playerType!=CHROMECAST_PLAYER"><video id="thevideo"></video></div>
+  <div class="video-content" ng-show="(_playerStatus().state==STATE_PLAYING||_playerStatus().state==STATE_PAUSED) && _playerStatus().type!=CHROMECAST_PLAYER"><video id="thevideo"></video></div>
 
   <!-- <div class="video-splash-overlay" ng-class="{active:(playerState!=STATE_PLAYING||mouseActive||playerType==CHROMECAST_PLAYER)}" ng-hide="minified">
     <div class="video-splash-overlay-content">
-      <h3 class="video-splash-overlay-title">{{activeMedia.file.name}}</h3>
+      <h3 class="video-splash-overlay-title">{{_playerStatus().media.file.name}}</h3>
       <p class="video-splash-overlay-sub text-muted">
-        <span class="inline-item"><span class="icon icon-clock"></span> {{activeMedia.meta.duration|hhmmss}}</span>
-        <span class="inline-item"><span class="icon icon-info"></span> {{activeMedia.meta.format}}</span>
-        <span class="inline-item"><span class="icon icon-drive"></span> {{activeMedia.file.size|bytes}}</span>
+        <span class="inline-item"><span class="icon icon-clock"></span> {{_playerStatus().media.meta.duration|hhmmss}}</span>
+        <span class="inline-item"><span class="icon icon-info"></span> {{_playerStatus().media.meta.format}}</span>
+        <span class="inline-item"><span class="icon icon-drive"></span> {{_playerStatus().media.file.size|bytes}}</span>
       </p>
     </div>
   </div> -->
 
 
-  <div class="video-loading" ng-if="playerState==STATE_LOADING">
+  <div class="video-loading" ng-if="_playerStatus().state==STATE_LOADING">
     <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="uil-ring-alt">
       <rect x="0" y="0" width="100" height="100" fill="none" class="bk"></rect>
       <circle class="spinner-track" cx="50" cy="50" r="40" stroke="#000000" fill="none" stroke-width="10" stroke-linecap="round"></circle>
@@ -29,13 +29,13 @@
     </svg>
   </div>
 
-  <div class="video-overlay" ng-class="{active:(playerState!=STATE_PLAYING||mouseActive||playerType==CHROMECAST_PLAYER)}">
+  <div class="video-overlay" ng-class="{active:(_playerStatus().state!=STATE_PLAYING||mouseActive||_playerStatus().type==CHROMECAST_PLAYER)}">
     <div class="video-overlay-title" ng-hide="minified">
-      <h3>{{activeMedia.file.name}}</h3>
+      <h3>{{_playerStatus().media.file.name}}</h3>
       <div class="text-muted">
-        <span class="inline-item"><span class="icon icon-clock"></span> {{activeMedia.meta.duration|hhmmss}}</span>
-        <span class="inline-item"><span class="icon icon-info"></span> {{activeMedia.meta.format}}</span>
-        <span class="inline-item"><span class="icon icon-drive"></span> {{activeMedia.file.size|bytes}}</span>
+        <span class="inline-item"><span class="icon icon-clock"></span> {{_playerStatus().media.meta.duration|hhmmss}}</span>
+        <span ng-if="_playerStatus().media.meta.dimensions" class="inline-item"><span class="icon icon-new-tab"></span> {{_playerStatus().media.meta.dimensions.width}}&times;{{_playerStatus().media.meta.dimensions.height}}</span>
+        <span class="inline-item"><span class="icon icon-drive"></span> {{_playerStatus().media.file.size|bytes}}</span>
       </div>
     </div>
 

@@ -26,6 +26,10 @@
 .navbar .nav.navright .nav-item {
   flex: 0;
 }
+.navbar .nav.navright .nav-item.disabled {
+  opacity: 0.5;
+}
+
 .navinfo-art {
   margin-right: 15px;
   height: 50px;
@@ -110,8 +114,8 @@
   width: 100%;
 }
 
-/*range reset*/
-input[type=range] {
+/*range */
+.slider-input input[type=range] {
   -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
   background: transparent; /* Otherwise white in Chrome */
   width: 100%;

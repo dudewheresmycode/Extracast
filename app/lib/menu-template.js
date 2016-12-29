@@ -15,25 +15,27 @@ const menuTemplate = [
       label: "File",
       submenu: [
           {
-              label: 'Open...',
-              accelerator: 'CmdOrCtrl+O',
-              click: () => {
-                console.log('Open Clicked');
+            label: 'Open...',
+            accelerator: 'CmdOrCtrl+O',
+            click: () => {
+              console.log('Open Clicked');
 
-                var files = dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']});
-
-                var mainWin = BrowserWindow.getFocusedWindow();
+              var files = dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']});
+              if(files && files.length){
                 var mapd = files.map(function(fp){
-                  var type = OK_TYPES.find(function(it){ return it.extensions.indexOf(path.extname(fp).substr(1)); }).name;
+                  var type = OK_TYPES.find(function(it){ return it.extensions.indexOf(path.extname(fp).substr(1)) > -1; }).name;
                   return {path:fp, name:path.basename(fp), type:type, size: fs.statSync(fp).size};
                 });
                 console.log(mapd);
-                mainWin.webContents.send('media.select', mapd);
+                BrowserWindow.getFocusedWindow().webContents.send('media.select', mapd);
               }
-          }, {
+            }
+          },
+          {
               label: 'New Playlist',
               click: () => {
                 console.log('Playlist Clicked');
+                BrowserWindow.getFocusedWindow().webContents.send('playlist.create');
               }
           }
       ]

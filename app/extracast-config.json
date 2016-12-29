@@ -1,96 +1,152 @@
 {
-  "media": [
-    {
-      "id": "BkK6X6xrl",
-      "file": {
-        "name": "Indiana.Jones.And.The.Last.Crusade.1989.720p.BluRay.x264.YIFY.mp4",
-        "path": "/Volumes/USB30FD/Features/Indiana Jones and the Last Crusade (1989)/Indiana.Jones.And.The.Last.Crusade.1989.720p.BluRay.x264.YIFY.mp4",
-        "size": 840095771
-      },
-      "meta": {
-        "format": "QuickTime / MOV",
-        "duration": 7613,
-        "size": 840095771
-      },
-      "thumbnails": {
-        "full": "/Users/addroid/Library/Application Support/Extracast/t-hd-BkK6X6xrl-a979cf40-ccb8-11e6-b8a9-7ba930fdbd78.jpg",
-        "square": "/Users/addroid/Library/Application Support/Extracast/t-sq-BkK6X6xrl-a979cf41-ccb8-11e6-b8a9-7ba930fdbd78.jpg"
-      }
-    },
-    {
-      "id": "SJztvaxSl",
-      "file": {
-        "name": "Tremors (1990).mp4",
-        "path": "/Volumes/USB30FD/Features/Tremors (1990).mp4",
-        "size": 3125433123
-      },
-      "meta": {
-        "format": "QuickTime / MOV",
-        "duration": 5745,
-        "size": 3125433123
-      },
-      "thumbnails": {
-        "full": "/Users/addroid/Library/Application Support/Extracast/t-hd-SJztvaxSl-e1cef940-ccba-11e6-b931-8b939eb2e8a8.jpg",
-        "square": "/Users/addroid/Library/Application Support/Extracast/t-sq-SJztvaxSl-e1cf2050-ccba-11e6-b931-8b939eb2e8a8.jpg"
-      }
-    },
-    {
-      "id": "B1Ytwaxrg",
-      "file": {
-        "name": "Willy.Wonka.&.the.Chocolate.Factory.1971.1080p.BrRip.720p.x264.YIFY.mp4",
-        "path": "/Volumes/USB30FD/Features/Willy Wonka & the Chocolate Factory (1971) [1080p]/Willy.Wonka.&.the.Chocolate.Factory.1971.1080p.BrRip.720p.x264.YIFY.mp4",
-        "size": 1348291576
-      },
-      "meta": {
-        "format": "QuickTime / MOV",
-        "duration": 5985,
-        "size": 1348291576
-      },
-      "thumbnails": {
-        "full": "/Users/addroid/Library/Application Support/Extracast/t-hd-B1Ytwaxrg-e5e5e110-ccba-11e6-b931-8b939eb2e8a8.jpg",
-        "square": "/Users/addroid/Library/Application Support/Extracast/t-sq-B1Ytwaxrg-e5e5e111-ccba-11e6-b931-8b939eb2e8a8.jpg"
-      }
-    },
-    {
-      "id": "SkQ5Dagrl",
-      "file": {
-        "name": "Blazing.Saddles.1974.1080p.BluRay.x264.YIFY.mp4",
-        "path": "/Volumes/USB30FD/Features/Blazing Saddles (1974)/Blazing.Saddles.1974.1080p.BluRay.x264.YIFY.mp4",
-        "size": 1550314086
-      },
-      "meta": {
-        "format": "QuickTime / MOV",
-        "duration": 5572,
-        "size": 1550314086
-      },
-      "thumbnails": {
-        "full": "/Users/addroid/Library/Application Support/Extracast/t-hd-SkQ5Dagrl-ebfb30f0-ccba-11e6-b931-8b939eb2e8a8.jpg",
-        "square": "/Users/addroid/Library/Application Support/Extracast/t-sq-SkQ5Dagrl-ebfb30f1-ccba-11e6-b931-8b939eb2e8a8.jpg"
-      }
-    },
-    {
-      "id": "BkH0qpxHg",
-      "file": {
-        "name": "Robin Hood Men in Tights (1993).mp4",
-        "path": "/Volumes/USB30FD/Features/Robin Hood Men in Tights (1993)/Robin Hood Men in Tights (1993).mp4",
-        "size": 1391872267
-      },
-      "meta": {
-        "format": "QuickTime / MOV",
-        "duration": 6262,
-        "size": 1391872267
-      },
-      "thumbnails": {
-        "full": "/Users/addroid/Library/Application Support/Extracast/t-hd-BkH0qpxHg-dd1779c0-ccbc-11e6-8bf3-252ed4d9c1c4.jpg",
-        "square": "/Users/addroid/Library/Application Support/Extracast/t-sq-BkH0qpxHg-dd1779c1-ccbc-11e6-8bf3-252ed4d9c1c4.jpg"
-      }
-    }
-  ],
   "config": {
     "video": {
       "bitrate": 1200,
       "size": "720",
       "port": 3130
     }
-  }
+  },
+  "media": [
+    {
+      "id": "2d221140-ccf5-11e6-876d-6d0460de302d",
+      "file": {
+        "name": "Star.Wars.Episode.4.A.New.Hope.1977.1080p.BrRip.x264.BOKUTOX.YIFY.mp4",
+        "path": "/Volumes/USB30FD/Inbox/Star Wars Episode IV A New Hope (1977) [1080p]/Star.Wars.Episode.4.A.New.Hope.1977.1080p.BrRip.x264.BOKUTOX.YIFY.mp4",
+        "size": 1826970305,
+        "type": "Video"
+      },
+      "meta": {
+        "format": "QuickTime / MOV",
+        "duration": 7485,
+        "size": 1826970305,
+        "dimensions": {
+          "width": 1920,
+          "height": 816
+        },
+        "video_codec": "h264",
+        "audio_codec": "aac"
+      },
+      "thumbnails": {
+        "full": "/Users/addroid/Library/Application Support/Extracast/t-hd-2d784790-ccf5-11e6-a1e7-092781c661ac.jpg",
+        "square": "/Users/addroid/Library/Application Support/Extracast/t-sq-2d784791-ccf5-11e6-a1e7-092781c661ac.jpg"
+      }
+    },
+    {
+      "id": "d04205e0-cd7e-11e6-873a-a9bce2218d4b",
+      "file": {
+        "name": "The.Goonies.1985.1080p.BrRip.x264.YIFY.mp4",
+        "path": "/Volumes/USB30FD/Features/The Goonies (1985) [1080p]/The.Goonies.1985.1080p.BrRip.x264.YIFY.mp4",
+        "size": 1607416374,
+        "type": "Video"
+      },
+      "meta": {
+        "format": "QuickTime / MOV",
+        "duration": 6835,
+        "size": 1607416374,
+        "dimensions": {
+          "width": 1920,
+          "height": 800
+        },
+        "video_codec": "h264",
+        "audio_codec": "aac"
+      },
+      "thumbnails": {
+        "full": "/Users/addroid/Library/Application Support/Extracast/t-hd-d0acfcb0-cd7e-11e6-bc84-1b072d270125.jpg",
+        "square": "/Users/addroid/Library/Application Support/Extracast/t-sq-d0acfcb1-cd7e-11e6-bc84-1b072d270125.jpg"
+      }
+    },
+    {
+      "id": "09a654f0-cd8c-11e6-b931-2d4ec71f7e2a",
+      "file": {
+        "name": "universe-chop-20s.mp4",
+        "path": "/Users/addroid/Movies/universe-chop-20s.mp4",
+        "size": 8697153,
+        "type": "Video"
+      },
+      "meta": {
+        "format": "QuickTime / MOV",
+        "duration": 17,
+        "size": 8697153,
+        "dimensions": {
+          "width": 854,
+          "height": 480
+        },
+        "video_codec": "h264",
+        "audio_codec": "aac"
+      },
+      "thumbnails": {
+        "full": "/Users/addroid/Library/Application Support/Extracast/t-hd-09d94bd0-cd8c-11e6-ab87-cdc361947136.jpg",
+        "square": "/Users/addroid/Library/Application Support/Extracast/t-sq-09d972e0-cd8c-11e6-ab87-cdc361947136.jpg"
+      }
+    }
+  ],
+  "playlists": [
+    {
+      "id": "93742dd0-ccf4-11e6-9d2c-0fffdf81bbfc",
+      "name": "New Playlist",
+      "created": "2016-12-28T11:55:49.933Z",
+      "$$hashKey": "object:5"
+    },
+    {
+      "id": "c9561fd0-ccf4-11e6-8ebe-8fea8941d640",
+      "name": "test",
+      "created": "2016-12-28T11:57:20.333Z",
+      "$$hashKey": "object:5"
+    },
+    {
+      "id": "d268aa20-ccf4-11e6-880f-9d505a42db18",
+      "name": "fds",
+      "created": "2016-12-28T11:57:35.554Z"
+    },
+    {
+      "id": "fefae1c0-ccf4-11e6-be2c-3b7c92b8f5ff",
+      "name": "test",
+      "created": "2016-12-28T11:58:50.333Z"
+    },
+    {
+      "id": "00163cd0-ccf5-11e6-be2c-3b7c92b8f5ff",
+      "name": "test",
+      "created": "2016-12-28T11:58:52.189Z"
+    },
+    {
+      "id": "113aaa50-ccf5-11e6-bc56-e19a179af62d",
+      "name": "test",
+      "created": "2016-12-28T11:59:20.950Z"
+    },
+    {
+      "id": "f90e6670-cd7f-11e6-bf49-1b1fb951f0e6",
+      "name": "You can make these",
+      "created": "2016-12-29T04:33:40.439Z"
+    },
+    {
+      "id": "ff485550-cd7f-11e6-bf49-1b1fb951f0e6",
+      "name": "More!",
+      "created": "2016-12-29T04:33:50.885Z"
+    },
+    {
+      "id": "0230f650-cd80-11e6-bf49-1b1fb951f0e6",
+      "name": "Another!",
+      "created": "2016-12-29T04:33:55.765Z"
+    },
+    {
+      "id": "3f65c140-cd80-11e6-b457-1d3a3ea6e43f",
+      "name": "Move Whenfinished",
+      "created": "2016-12-29T04:35:38.453Z"
+    },
+    {
+      "id": "83f1f900-cd80-11e6-bc3e-b12c64dc3370",
+      "name": "new",
+      "created": "2016-12-29T04:37:33.456Z"
+    },
+    {
+      "id": "8de82c90-cd80-11e6-9c0c-97fa1f6b7078",
+      "name": "Select",
+      "created": "2016-12-29T04:37:50.169Z"
+    },
+    {
+      "id": "95c989e0-cd80-11e6-a14a-d7a5446b8dfa",
+      "name": "Boobz",
+      "created": "2016-12-29T04:38:03.390Z"
+    }
+  ]
 }

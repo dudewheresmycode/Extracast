@@ -4,7 +4,7 @@
     <div class="navinfo-art" ng-style="(_activeMedia().thumbnails.square|bgImage)"></div>
     <div class="navinfo-info">
       <div class="navinfo-info-heading"><a href>{{_activeMedia().file.name||'&nbsp;'}}</a></div>
-      <div class="navinfo-info-subheading text-muted">{{currentTime|hhmmss}} / {{_activeMedia().meta.duration|hhmmss}}</div>
+      <div class="navinfo-info-subheading text-muted">{{_playerStatus().currentTime|hhmmss}} / {{_activeMedia().meta.duration|hhmmss}}</div>
     </div>
   </div>
 
@@ -17,7 +17,8 @@
         </li> -->
 
         <li class="nav-item">
-          <div class="dropdown dropup">
+          <a href ui-sref="settings"><span class="icon icon-cog"></span></a>
+          <!-- <div class="dropdown dropup">
             <a class="btn dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <span class="icon icon-cog"></span>
             </a>
@@ -25,31 +26,37 @@
               <a class="dropdown-item">Video Settings</a>
               <a class="dropdown-item">Caption Settings</a>
             </div>
-          </div>
+          </div> -->
         </li>
-        <li class="nav-item">
-          <a href ng-click="$stop()"><span class="icon icon-backward2"></span></a>
+        <li class="nav-item" ng-class="{disabled:_playerStatus().state==_rootStatus('STATE_STOPPED')}">
+          <a href ng-click="$stop()"><span class="icon icon-backward2"></span> {{_playerStatus().state_rootStatus('STATE_STOPPED')}}</a>
         </li>
-        <li class="nav-item nav-item-center">
-          <a href ng-click="$pause()"><span class="icon icon-pause2"></span></a>
+        <li class="nav-item nav-item-center" ng-class="{disabled:_playerStatus().state==_rootStatus('STATE_STOPPED')}">
+          <a href ng-click="$pause()"><span class="icon icon-pause2" ng-class="(_playerStatus().paused||_playerStatus().stopped)?'icon-play3':'icon-pause2'"></span></a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" ng-class="{disabled:_playerStatus().state==_rootStatus('STATE_STOPPED')}">
           <a href ng-click="$fullscreen()"><span class="icon icon-forward3"></span></a>
         </li>
-        <li class="nav-item" ng-class="{disabled:playerType==CHROMECAST_PLAYER}">
-          <a href ng-click="$fullscreen()"><span class="icon icon-enlarge2"></span> p{{activeMedia}}</a>
+        <li class="nav-item" ng-class="{disabled:_isChromeCastPlayer()||_playerStatus().state==_rootStatus('STATE_STOPPED')}">
+          <a href ng-click="$fullscreen()"><span class="icon icon-enlarge2"></span></a>
         </li>
+        <!-- <li>
+
+          <pre>
+            {{_playerStatus()}}
+          </pre>
+        </li> -->
       </ul>
     </div>
     <div class="navmain-progress">
-      <slider-input data-onchange="$seek" data-disabled="activeMedia" data-value="{{(currentTime/activeMedia.meta.duration)*100}}"></slider-input>
+      <slider-input data-onchange="$seek" data-disabled="!_activeMedia()" data-value="{{(_playerStatus().currentTime/_activeMedia().meta.duration)*100}}"></slider-input>
     </div>
   </div>
 
   <ul class="navright nav navbar-nav nav-right">
     <li class="nav-item">
       <a href ng-click="$mute()"><span class="icon icon-volume-low"></span></a>
-      <slider-input></slider-input>
+      <slider-input data-oninput="$volume" data-value="{{_playerStatus().volume}}"></slider-input>
     </li>
     <li class="nav-item chromecast">
       <chrome-cast></chrome-cast>

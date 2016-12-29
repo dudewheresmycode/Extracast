@@ -1,5 +1,8 @@
 node_modules
 db.json
-releases
+release
 tests
 app/ffmpeg-bundle
+app/extracast-config.json
+credentials-github.json
+credentials-aws.json

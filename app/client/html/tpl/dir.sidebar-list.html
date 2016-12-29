@@ -1,0 +1,21 @@
+<div class="list-group list-group-sidebar">
+  <a ui-sref-active="active" ui-sref="library()" class="list-group-item active"><div><span class="icon icon-book"></span> Media Library</div></a>
+
+  <!-- <li class="list-group-separator"></li> -->
+  <div class="list-group-heading">Apps</div>
+  <a ui-sref-active="active" ui-sref="app({appId:'232sfds'})" class="list-group-item"><div><span class="icon icon-film"></span> Archive.org</div></a>
+
+  <!-- Maybe someday -->
+  <!-- <a class="list-group-item"><span class="icon icon-book"></span> Netflix</li> -->
+
+  <div class="list-group-heading">
+    Playlists
+  </div>
+  <a ui-sref-active="active" ui-sref="playlist({listId:'a2390ad9'})" class="list-group-item"><div><span class="icon icon-folder"></span> Playlist 1</div></a>
+  <a ng-repeat="playlist in playlists() track by playlist.id" context-row="playlist" ui-sref-active="active" ui-sref="playlist({listId:playlist.id})" class="list-group-item">
+    <div><span class="icon icon-folder"></span> {{playlist.name}}</div>
+  </a>
+
+  <a class="list-group-item" ng-show="createMode" new-playlist></a>
+  <a ng-click="createMode=true" class="list-group-item"><div><span class="icon icon-plus"></span> Create</div></a>
+</div>

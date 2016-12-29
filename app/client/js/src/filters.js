@@ -15,7 +15,7 @@ angular.module('ec.filters',[])
 })
 .filter('loader',function(){
   return function(input){
-    return input ? input : '../images/ring-alt.svg';
+    return input.meta ? (input.thumbnails && input.thumbnails.square ? input.thumbnails.square : '../images/default-'+input.file.type.toLowerCase()+'.svg') : '../images/ring-alt.svg';
   }
 })
 .filter('bytes', function() {
@@ -24,7 +24,7 @@ angular.module('ec.filters',[])
 		if (typeof precision === 'undefined') precision = 1;
 		var units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'],
 			number = Math.floor(Math.log(bytes) / Math.log(1024));
-		return (bytes / Math.pow(1024, Math.floor(number))).toFixed(precision) +  ' ' + units[number];
+		return (bytes / Math.pow(1000, Math.floor(number))).toFixed(precision) +  ' ' + units[number];
 	}
 })
 .filter('hhmmss',function(){

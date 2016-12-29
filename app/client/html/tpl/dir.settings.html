@@ -1,0 +1,42 @@
+<div class="container">
+
+  <h3>Transcoding Settings</h3>
+
+  <div class="form-group">
+    <label>Picture Mode</label>
+    <div class="form-control-select">
+      <select class="form-control" ng-model="settings.video.size" ng-options="size for size in PICTURE_SIZES"></select>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>Limit Bitrate</label>
+    <div class="form-control-group">
+
+      <div class="form-check">
+        <input id="radio-1" class="checkbox-custom" ng-model="settings.video.limitBitrate" name="radio-group" type="checkbox" />
+        <label for="radio-1" class="checkbox-custom-label"></label>
+      </div>
+
+      <!-- <label class="radio-custom-label">Enable</label>
+      <input type="checkbox" class="checkbox-custom" ng-model="settings.video.limitBitrate" /> -->
+      <div class="form-range">
+        <input class="form-control" ng-disabled="!settings.video.limitBitrate" type="range" min="250" max="5000" ng-model="settings.video.bitrate" />
+        <label>{{settings.video.bitrate*1000|bytes}}/s</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>Streaming Port</label>
+    <div class="form-control-group">
+      <input class="form-control" type="text" min="250" max="5000" ng-model="settings.video.port" />
+    </div>
+  </div>
+
+  <pre>
+    {{settings|json}}
+  </pre>
+
+
+</div>
