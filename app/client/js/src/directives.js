@@ -111,6 +111,10 @@ angular.module('ec.directives',[])
         return $ecPlayerStatus.status();
       }
 
+      scope._timeMath = function(){
+        return scope._playerStatus().currentTime > 0 && scope._activeMedia() ? scope._playerStatus().currentTime / scope._activeMedia().meta.duration * 100 : 0;
+      }
+
       scope.currentPlayer = function(){
         if($ecPlayerStatus.get("type")==$rootScope.LOCAL_PLAYER)
          return $player;
@@ -135,6 +139,8 @@ angular.module('ec.directives',[])
       scope.$fullscreen = function(){
         if($ecPlayerStatus.get("type")==$rootScope.LOCAL_PLAYER)
           $player.fullscreen();
+        if($ecPlayerStatus.get("type")==$rootScope.CHROMECAST_PLAYER)
+          $chromecast.togglePictureMode();
       }
       scope.$volume = function(v){
         console.log("ctlVOLUME", v, scope.currentPlayer());
@@ -151,7 +157,6 @@ angular.module('ec.directives',[])
         if(scope.currentPlayer()) scope.currentPlayer().seek(time);
       }
       scope.$pause = function(){
-        console.log("PAUSE!");
         if(scope.currentPlayer()) scope.currentPlayer().pause();
       }
       scope.$play = function(){
@@ -212,7 +217,8 @@ angular.module('ec.directives',[])
             //ipc.sendSync("transcode.stop");
             $player.stop();
             $ecStreamCtl.stop();
-            $ecStreamCtl.start(item,ctime);
+            $ecStreamCtl.start($ecPlayerStatus.get('media'),ctime);
+
             // ipc.send("transcode.stream", {
             //   inputFile:$rootScope.activeMedia.file.path,
             //   thumbnails:$rootScope.activeMedia.thumbnails,
@@ -229,23 +235,32 @@ angular.module('ec.directives',[])
     }
   }
 })
-.directive('videoPlayer', function($rootScope,$timeout,$ecStreamCtl,$chromecast,$ecPlayerStatus,$ecConfig,$player){
+.directive('videoPlayer', function($rootScope,$ecLastFrameStore,$timeout,$ecStreamCtl,$chromecast,$ecPlayerStatus,$ecConfig,$player){
   return {
     templateUrl: 'tpl/dir.video-player.html',
     replace: true,
     link: function(scope,ele,attr){
       scope.videoEle = ele.find('video')[0];
-      scope.videoEle.addEventListener('progress',function(e){
-        // var loaded = e.loaded;
-        // console.log("LOADING", scope.videoEle.loaded, scope.videoEle.duration);
-        // if(!isNaN(scope.videoEle.duration) && scope.videoEle.paused){
-        //   scope.videoEle.play();
-        // }
-      });
+      scope.videoEle.controls = false;
+      //scope.videoEle.autoplay = true;
+      //scope.videoEle.preload = "none";
+
+
+      scope._isResuming = false;
       scope._gracePeriod = 2000;
       scope.mouseActive = true;
       scope._mouse = {current:[],last:[]};
 
+      scope._splashBg = function(){
+        var isLastFrame = !!$ecLastFrameStore.get();
+        var url = isLastFrame ? $ecLastFrameStore.get() : (scope._playerStatus().media ? 'file://'+scope._playerStatus().media.thumbnails.full : '');
+
+        var o = {'background-image':'url(\''+url+'\')'};
+        if(isLastFrame){
+          o['background-size'] = 'contain';
+        }
+        return o;
+      }
       scope._playerStatus = function(){
         return $ecPlayerStatus.status();
       }
@@ -278,30 +293,49 @@ angular.module('ec.directives',[])
       scope._dtimer= $timeout(_defer, scope._gracePeriod);
 
       scope.videoEle.addEventListener('canplay',function(){
-        $timeout(function(){ scope.videoEle.play(); }, 2000);
-      });
-      scope.videoEle.addEventListener('progress',function(e){
-        console.log("PROGRESS", this.loaded);
-      });
-      scope.videoEle.addEventListener('play',function(){
-        //$rootScope.playerState=$rootScope.STATE_PLAYING;
+        console.log("CAN PLAY");
+        $timeout(function(){
+        scope.videoEle.play();
+        });
         $ecPlayerStatus.set("state", $rootScope.STATE_PLAYING);
       });
+      //scope.videoEle.addEventListener('progress',function(e){
+        //console.log("PROGRESS", e);
+      //});
+
+      // scope.videoEle.addEventListener('progress',function(e){
+      //   // var loaded = e.loaded;
+      //   console.log("progress", scope.videoEle.loaded, scope.videoEle.duration);
+      //   if(!isNaN(scope.videoEle.duration) && scope.videoEle.paused && scope.videoEle.paused){
+      //     console.log("PLAY");
+      //     scope.videoEle.play();
+      //   }
+      // });
+
+      scope.videoEle.addEventListener('play',function(){
+        //$rootScope.playerState=$rootScope.STATE_PLAYING;
+        //$ecPlayerStatus.set("state", $rootScope.STATE_PLAYING);
+      });
       scope.videoEle.addEventListener('pause',function(){
+        $ecLastFrameStore.store(scope.videoEle);
         //$rootScope.playerState=$rootScope.STATE_PAUSED;
-        $ecPlayerStatus.set("state", $rootScope.STATE_PAUSED);
-        $ecPlayerStatus.set("paused", true);
-        $ecPlayerStatus.set("currentTime", scope.videoEle.currentTime + $ecPlayerStatus.get("seekOffset"));
+        //$ecPlayerStatus.set("state", $rootScope.STATE_PAUSED);
+        //$ecPlayerStatus.set("paused", true);
+        //$ecPlayerStatus.set("currentTime", scope.videoEle.currentTime + $ecPlayerStatus.get("seekOffset"));
       });
       scope.videoEle.addEventListener('ended',function(){
-        $rootScope.playerState=$rootScope.STATE_STOPPED;
-//        $rootScope.videoActive = false;
-        $rootScope.$emit('player.ended', scope.videoEle.currentTime);
-        $ecPlayerStatus.set("currentTime", 0);
-        $rootScope.$apply();
+        console.log("STOPPED");
+        scope.$stop(true);
+//
+// //        $rootScope.videoActive = false;
+//         $rootScope.$emit('player.ended');
+//         $ecPlayerStatus.set("currentTime", 0);
+//         $rootScope.$apply();
       });
       scope.videoEle.addEventListener('timeupdate',function(e){
-        $ecPlayerStatus.set("currentTime", scope.videoEle.currentTime + $ecPlayerStatus.get("seekOffset"));
+        if($ecPlayerStatus.get("state")==$rootScope.STATE_PLAYING){
+          $ecPlayerStatus.set("currentTime", scope.videoEle.currentTime + $ecPlayerStatus.get("seekOffset"));
+        }
         //$rootScope.$emit('player.timechange', scope.videoEle.currentTime);
         //$rootScope.$apply();
       });
@@ -310,51 +344,52 @@ angular.module('ec.directives',[])
         scope.minified=!scope.minified;
       }
 
-      scope.start = function(stream){
-        //$(scope.videoEle).prop("src", "http://localhost:3130/stream.mp4");
-        console.log("PLAY", stream)
-        $ecPlayerStatus.set("paused", false);
-        $ecPlayerStatus.set("state", $rootScope.STATE_LOADING);
-        $(scope.videoEle).prop("src", stream);
+      scope.start = function(opts){
+
+        //scope.videoEle.src = "";
+        //$ecPlayerStatus.set("paused", false);
+        // if(!opts.resume){
+        //   $ecPlayerStatus.set("state", $rootScope.STATE_LOADING);
+        // }
+        //$(scope.videoEle).prop("src", stream);
+
+        $(scope.videoEle).prop("src", opts.streamUrl);
         scope.videoEle.volume = $ecPlayerStatus.get("volume")/100;
-        scope.videoEle.load();
+        //scope.videoEle.load();
+        //scope.videoEle.play();
         $rootScope.isSeeking=false;
       }
 
-      scope._stop = function(){
-        //$rootScope.videoActive = false;
-        //$ecPlayerStatus.set("paused", false);
-        //$ecPlayerStatus.set("stopped", true);
-        $ecPlayerStatus.set("currentTime", 0);
 
-        scope.videoEle.pause();
-
-        $(scope.videoEle).prop("src", "");
-        //$rootScope.playerState=$rootScope.STATE_STOPPED;
-      }
-      scope.$stop = function(){
+      scope.$stop = function(playerRequested){
         //$rootScope.activeMedia = null;
         $ecPlayerStatus.set('media',null)
         $ecPlayerStatus.set("state", $rootScope.STATE_STOPPED);
+        $ecPlayerStatus.set("currentTime", 0);
+        $ecPlayerStatus.set("seekOffset", 0);
 
-        //first stop the stream
-        $ecStreamCtl.stop();
+        if(!playerRequested){
+          //first stop the stream
+          $ecStreamCtl.stop();
 
-        if($ecPlayerStatus.get("type")==$rootScope.CHROMECAST_PLAYER){
-          $chromecast.stop();
-        }else if($ecPlayerStatus.get("type")==$rootScope.LOCAL_PLAYER){
-          scope._stop();
+
+          if($ecPlayerStatus.get("type")==$rootScope.CHROMECAST_PLAYER){
+            $chromecast.stop();
+          }else if($ecPlayerStatus.get("type")==$rootScope.LOCAL_PLAYER){
+            scope.videoEle.pause();
+            $(scope.videoEle).prop("src", "");
+          }
         }
 
       }
       $rootScope.$on('player.fullscreen', function(evt){
-
-        if (BigScreen.enabled) {
-            BigScreen.toggle();
-            BigScreen.request(ele[0], function(){ console.log("enter"); }, function(){ console.log("exit"); }, function(e){ console.log("err",e); });
-        }
-        else {
-            // fallback
+        if($ecPlayerStatus.get("type")!=$rootScope.CHROMECAST_PLAYER){
+          if (BigScreen.enabled) {
+              BigScreen.toggle();
+              BigScreen.request(ele[0], function(){ console.log("enter"); }, function(){ console.log("exit"); }, function(e){ console.log("err",e); });
+          }else{
+              // fallback
+          }
         }
         // console.log("FULL");
         // if (ele[0].webkitRequestFullscreen) {
@@ -365,64 +400,53 @@ angular.module('ec.directives',[])
 
 
       $rootScope.$on('player.seek', function(evt,s){
-        scope.videoEle.pause();
-        $(ele).prop("src", "");
-
         $ecStreamCtl.stop();
+        scope.videoEle.pause();
+        scope._isResuming=true;
         $ecStreamCtl.start($ecPlayerStatus.get('media'), s);
-
-        //ipc.sendSync("transcode.stop");
-        // ipc.send("transcode.stream", {
-        //   inputFile:$rootScope.activeMedia.file.path,
-        //   thumbnails:$rootScope.activeMedia.thumbnails,
-        //   duration:$rootScope.activeMedia.meta.duration,
-        //   http_stream:($rootScope.playerType == $rootScope.CHROMECAST_PLAYER),
-        //   seek:s, vopts:$ecConfig.get("video")
-        // });
-        scope.start();
+        //scope.start({resume:true});
       });
-      scope._pauseTime = 0;
+
       $rootScope.$on('player.pause', function(evt){
-        scope._pauseTime = scope.videoEle.currentTime + $ecPlayerStatus.get("seekOffset");
-        console.log(scope._pauseTime);
+        console.log("PAUSE");
+        $ecPlayerStatus.set("state", $rootScope.STATE_PAUSED);
+        $ecPlayerStatus.set("seekOffset", $ecPlayerStatus.get("currentTime"));
+        $ecStreamCtl.stop();
         scope.videoEle.pause();
       });
       $rootScope.$on('player.resume',function(evt){
-        console.log(scope._pauseTime);
-        //$rootScope.seekOffset = scope._pauseTime;
-        $ecPlayerStatus.set("seekOffset", scope._pauseTime);
-        $ecStreamCtl.start($ecPlayerStatus.get('media'), scope._pauseTime);
-
-      //   ipc.send("transcode.stream", {
-      //     inputFile:$rootScope.activeMedia.file.path,
-      //     thumbnails:$rootScope.activeMedia.thumbnails,
-      //     duration:$rootScope.activeMedia.meta.duration,
-      //     http_stream:($rootScope.playerType == $rootScope.CHROMECAST_PLAYER),
-      //     seek:scope._pauseTime,
-      //     vopts:$ecConfig.get("video")
-      // });
-        scope.start();
+        console.log("RESUME");
+        // scope._isResuming=true;
+        $ecPlayerStatus.set("state", $rootScope.STATE_PLAYING);
+        $ecStreamCtl.start($ecPlayerStatus.get('media'), $ecPlayerStatus.get("seekOffset"));
       })
       $rootScope.$on('player.stop', function(evt,file){
-        scope._stop();
+        scope.videoEle.pause();
+        $(scope.videoEle).prop("src", "");
+        //scope._stop();
+        //scope._isResuming=false;
       });
-      $rootScope.$on('player.start', function(evt,file,stream){
-        //$rootScope.videoActive = true;
-        $rootScope.playerState=$rootScope.STATE_LOADING;
-        console.log("PLAY", evt,file);
-        scope.start(stream);
+
+      $rootScope.$on('player.start', function(evt,item,streamUrl){
+        $(scope.videoEle).prop("src", "");
+        $ecPlayerStatus.set("state", $rootScope.STATE_LOADING);
+        scope.start({resume:scope._isResuming, streamUrl:streamUrl});
       });
     }
   }
 })
-.directive('contextGroup', function(){
+.directive('contextGroup', function($rootScope){
   return {
-    //scope: {},
+    scope: {},
     link: function(scope,ele,attr){
-      scope.contextVisible = false;
+      scope.isOpen = function(){
+        return $rootScope.contextVisible;
+      }
+      $rootScope.contextVisible = false;
       scope.position = [0,0];
       scope.selectedMedia = null;
       scope.contextStyle = function(){
+        console.log(scope.position);
         return {top:scope.position[1]+'px',left:scope.position[0]+'px'};
       }
       scope.item_play = function(){
@@ -431,7 +455,7 @@ angular.module('ec.directives',[])
       }
 
       $(window).on('click',function(e){
-        scope.contextVisible = false;
+        $rootScope.contextVisible = false;
         scope.$apply();
       });
 
@@ -440,7 +464,7 @@ angular.module('ec.directives',[])
   }
 })
 
-.directive('contextRow', function($parse){
+.directive('contextRow', function($rootScope,$parse){
   return {
     //scope:{contextRow:'='},
     link: function(scope,ele,attr){
@@ -454,17 +478,18 @@ angular.module('ec.directives',[])
 
       $(ele).on('mousedown',function(event){
         if(event.which==3){
-          scope.$parent.selectedMedia = item;
-          scope.$parent.selected = item.id;
-          var maxX = $(window).width() - $(ele).parent().find('.context-menu').outerWidth();
+          var maxX = $(window).width() - $(ele).parent().closest('.context-menu').outerWidth();
           var cx = event.pageX > maxX ? maxX : event.pageX;
           console.log(maxX, cx);
           scope.$parent.position = [cx,event.pageY];
-          scope.$parent.contextVisible = true;
+          $rootScope.contextVisible = true;
           //$(ele).find('.context-menu').addClass('open');
           console.log("Context", event, scope.$parent.position);
           event.preventDefault();
           event.stopPropagation();
+
+          //scope.$parent.selectedMedia = item;
+          //scope.$parent.selected = item.id;
           scope.$apply();
         }
       });
@@ -525,14 +550,19 @@ angular.module('ec.directives',[])
     link: function(scope,ele,attr){
 
       scope.settings = angular.copy($ecConfig.all());
-
+      scope.$watch('settings',function(nv,ov){
+        if(nv && nv!=ov){
+          //console.log("SETTINGS ", nv, ov);
+          $ecConfig.set(nv);
+        }
+      },true);
     }
   }
 })
 
 .directive('mediaList',function($rootScope,$ecPlayerStatus,$ecStreamCtl,$filter,$timeout,$chromecast,$ecConfig,$player,$media){
   return {
-    scope: {},
+    //scope: {},
     replace:true,
     templateUrl: 'tpl/dir.media-list.html',
     link: function(scope,ele,attr){

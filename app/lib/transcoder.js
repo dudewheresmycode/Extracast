@@ -20,12 +20,15 @@ const mime = require("mime");
 const hhmmss = require("hh-mm-ss");
 const ffparse = require('ffmpeg-parse');
 
+var log = require('electron-log');
+log.transports.file.level = 'info';
 var id3 = require('id3js');
 
 process.env.FFMPEG_BIN_DIR = 'ffmpeg-bundle/';
 process.env.FFMPEG_BIN_PATH = searchBinaryPath("ffmpeg");
 process.env.FFPROBE_BIN_PATH = searchBinaryPath("ffprobe");
 
+log.info("Extracast - FFMPEG PATH: "+process.env.FFMPEG_BIN_PATH);
 
 
 let transcode_process=false;
@@ -36,21 +39,22 @@ module.exports = new EventEmitter();
 
 let _processQueue = [], _processBusy = false;
 ipcMain.on("transcode.stop", function(event){
-  console.log("transcode.stop");
-  console.log("KILL FFMPEG");
   module.exports.kill();
   event.returnValue = 'killed'
 });
-
+ipcMain.on("transcode.pause", function(event){
+  if(transcode_process) ec_http.pause();
+});
+ipcMain.on("transcode.resume", function(event){
+  if(transcode_process) ec_http.resume();
+});
 ipcMain.on('transcode.stream', function(event, options, stream){
   //console.log(params);
   // var outputFile = app.getPath("temp")+"/stream.webm";
   // var writer = new streams.WritableStream();
   // var reader = new streams.ReadableStream();
-  console.log("STREAM", options);
   //_cache = new Buffer("", "binary")
   module.exports.stream(options, event.sender, function(err,stream){
-    console.log("READY");
     event.sender.send('transcode.ready', options, stream)
   });
 
@@ -58,7 +62,6 @@ ipcMain.on('transcode.stream', function(event, options, stream){
 
 ipcMain.on('transcoder.probe.input', function(event,options){
 
-  console.log("PROBE", options);
   var sender = event.sender;
   var _callback = function(err,obj){
     sender.send('transcoder.probe.result', obj);
@@ -66,17 +69,13 @@ ipcMain.on('transcoder.probe.input', function(event,options){
 
   if(options.input.file.type=='Video' || options.input.file.type=='Audio'){
     probe(options, function(err, meta){
-      console.log(err, meta);
       if(options.input.file.type=='Video'){
-        console.log("VIDEO type");
         options.seekTo = hhmmss.fromS(Math.round(meta.format.duration*0.40)); //seek 40% into the content
         thumbnails(options, function(err,thmbs){
           _callback(null, {meta:meta, thumbnails:thmbs, fileId:options.input.id})
         });
       }else if(options.input.file.type=='Audio'){
-        console.log("AUDIO type");
         if(meta.format.format_name=='mp3'){
-          console.log("MP3 type");
           id3({ file: options.input.file.path, type: id3.OPEN_LOCAL }, function(err, tags) {
             meta.id3tags = tags.v2;
             //var base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer)));
@@ -136,15 +135,13 @@ function resize(input,options,callback){
   var tmp_hd = _th("hd");
   var tmp_sq = _th("sq");
 
-  console.log("resize input: %s", input);
 
   sharp(input)
-    .jpeg({quality:50})
-    .resize(854, 480)
+    .jpeg({quality:60})
+    .resize(1280, 720)
     .min()
     .crop(sharp.gravity.center)
     .toFile(tmp_hd, function(err){
-      console.log("get full thumnail: %s ", input);
 
       sharp(input)
         .jpeg({quality:50})
@@ -173,7 +170,6 @@ function thumbnails(options, callback){
 
   var tmp = _th("hd");
 
-  console.log("get full thumnail: %s ", tmp);
   // -vf \"select=gt(scene\,0.4)\"
   //gt(scene\,0.4)*
   var cmd = ['-ss', options.seekTo, "-i", options.input.file.path, "-frames:v", 1, "-t", 1, "-vf", "select='eq(pict_type\,I)'", tmp];
@@ -200,7 +196,6 @@ function thumbnails(options, callback){
 module.exports.probe = (options, callback) => {
 
   probe(options, function(err, meta){
-    console.log(err, meta);
     options.seekTo = hhmmss.fromS(Math.round(meta.format.duration*0.40)); //seek 40% into the content
     thumbnails(options, function(err,thmbs){
       callback(null, {meta:meta, thumbnails:thmbs, fileId:options.fileId})
@@ -208,10 +203,20 @@ module.exports.probe = (options, callback) => {
   })
 
 };
-
+module.exports.pause = () => {
+  //ec_http.pause();
+  transcode_process.pause();
+}
+module.exports.resume = () => {
+  //ec_http.pause();
+  transcode_process.resume();
+}
 module.exports.kill = () => {
+
   if(transcode_process)
     transcode_process.kill();
+  ec_http.stop();
+
   //if(transcode_server)
   //  transcode_server.close();
 };
@@ -233,30 +238,44 @@ module.exports.kill = () => {
 
 */
 
+var currentResponse;
+var streamOverHTTP = function(options, http_res){
 
-var streamOverHTTP = function(options, outStream, done){
+
+  log.info("Extracast - start streaming file: "+options.inputFile);
 
   transcode_process = new Transcoder(options.inputFile);
+  currentResponse = http_res;
 
   if(options.seek){
     var seekTo = hhmmss.fromS(options.seek);
     transcode_process.custom('ss', seekTo);
   }
 
+  if(options.vopts.limitBitrate){
+    transcode_process
+    .custom("minrate", (options.vopts.bitrate*0.65) * 1000)
+    .custom("maxrate", options.vopts.bitrate * 1000)
+    .videoBitrate(options.vopts.bitrate * 1000);
+  }
+  // if(options.playerType==constants.CHROMECAST_PLAYER){
+  //   transcode_process.maxSize(options._playbackSize[0],options._playbackSize[1])
+  // }
+
   transcode_process
     .videoCodec('h264')
     .format('mp4')
-    //.custom("profile", "ultrafast")
+    .maxSize(options._playbackSize[0],options._playbackSize[1])
+    //.custom("profile:v", "fast")
     //.custom("movflags", "+faststart")
     .custom("pix_fmt", "yuv420p")
-    .maxSize(options._playbackSize[0],options._playbackSize[1])
 
     //go as high as possible?
     //.custom("threads", 2)
     //.custom("minrate", (_stream_opts._playbackBitrate*0.65) * 1000)
     //.custom("maxrate", (_stream_opts._playbackBitrate*1.20) * 1000)
     //.videoBitrate(_stream_opts._playbackBitrate * 1000)
-    //.fps(25)
+    .fps(30)
 
     .audioCodec('aac')
     .sampleRate(44100)
@@ -267,29 +286,30 @@ var streamOverHTTP = function(options, outStream, done){
     .custom('strict', 'experimental')
     .on('progress', function(data) {
       var obj = ffparse(data);
-      if(currentSender) currentSender.send('transcode.stats', obj);
+      //if(currentSender) currentSender.send('transcode.stats', obj);
     })
     .on('finish', function() {
       console.log('finished transcoding');
-      done(null);
+      ec_http.stop();
       //transcode_server.close();
     })
     .on('error', function(err) {
-      done(err);
+      //done(err);
       console.log('transcoding error: %o', err);
     });
 
-    transcode_process.stream().pipe(outStream);
+    transcode_process.stream().pipe(http_res);
 
 }
 
 
-module.exports.stream = (options,sender,callback) => {
+module.exports.stream = (options, sender, callback) => {
   var self = this;
 
   var _stream_opts = Object.assign(options);
 
   currentSender = sender;
+  log.info(`Extracast - start stream ${options.inputFile}`);
 
   if(_stream_opts.vopts.port)
     process.env.HTTP_STREAM_PORT = _stream_opts.vopts.port;
@@ -308,14 +328,17 @@ module.exports.stream = (options,sender,callback) => {
     (_stream_opts.vopts.size === '480' ? 750 : defaultBitrate))));
 
   //if(options.http_stream){
-    console.log("STREAM OPTS", _stream_opts);
-
     ec_http.server(_stream_opts, callback);
-    ec_http.on('streamRequest',function(options,res){
-      console.log("NEW STREAM REQ");
-      streamOverHTTP(options,res,function(){
-        console.log("STREAM DONE");
-      });
-      console.log(options);
-    })
+    ec_http.removeListener("streamRequest", streamOverHTTP);
+    ec_http.on("streamRequest", streamOverHTTP);
+
+
+    // function(options,res){
+    //   console.log("NEW STREAM REQ");
+    //   streamOverHTTP(options, res, function(){
+    //     console.log("STREAM DONE");
+    //     ec_http.stop();
+    //   });
+    // })
+
 };

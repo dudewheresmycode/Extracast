@@ -42,7 +42,7 @@
   </div>
 
 
-  <div class="context" ng-class="{open:contextVisible}">
+  <div class="context" ng-class="{open:isOpen()}">
     <div class="context-menu" ng-style="contextStyle()">
       <a class="dropdown-item" ng-click="item_play()">
         <span class="icon icon-play"></span> Play

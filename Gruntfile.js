@@ -28,7 +28,8 @@ module.exports = function(grunt) {
     dist: "app/client/dist",
     clean: {
       dist:['<%= dist %>'],
-      release:['release/'+target]
+      ecconfig:['app/extracast-config.json'],
+      release:['release']
     },
     less: {
       build: {

@@ -29,15 +29,16 @@
           </div> -->
         </li>
         <li class="nav-item" ng-class="{disabled:_playerStatus().state==_rootStatus('STATE_STOPPED')}">
-          <a href ng-click="$stop()"><span class="icon icon-backward2"></span> {{_playerStatus().state_rootStatus('STATE_STOPPED')}}</a>
+          <a href><span class="icon icon-backward2"></span></a>
         </li>
-        <li class="nav-item nav-item-center" ng-class="{disabled:_playerStatus().state==_rootStatus('STATE_STOPPED')}">
-          <a href ng-click="$pause()"><span class="icon icon-pause2" ng-class="(_playerStatus().paused||_playerStatus().stopped)?'icon-play3':'icon-pause2'"></span></a>
+        <li class="nav-item nav-item-center">
+           <!-- ng-class="{disabled:_playerStatus().state==_rootStatus('STATE_STOPPED')}"> -->
+          <a href ng-click="$pause()"><span class="icon" ng-class="_playerStatus().state==_rootStatus('STATE_PLAYING')?'icon-pause2':'icon-play3'"></span></a>
         </li>
         <li class="nav-item" ng-class="{disabled:_playerStatus().state==_rootStatus('STATE_STOPPED')}">
-          <a href ng-click="$fullscreen()"><span class="icon icon-forward3"></span></a>
+          <a href><span class="icon icon-forward3"></span></a>
         </li>
-        <li class="nav-item" ng-class="{disabled:_isChromeCastPlayer()||_playerStatus().state==_rootStatus('STATE_STOPPED')}">
+        <li class="nav-item" ng-class="{disabled:_playerStatus().state==_rootStatus('STATE_STOPPED')}">
           <a href ng-click="$fullscreen()"><span class="icon icon-enlarge2"></span></a>
         </li>
         <!-- <li>
@@ -49,7 +50,7 @@
       </ul>
     </div>
     <div class="navmain-progress">
-      <slider-input data-onchange="$seek" data-disabled="!_activeMedia()" data-value="{{(_playerStatus().currentTime/_activeMedia().meta.duration)*100}}"></slider-input>
+      <slider-input data-onchange="$seek" data-disabled="!_activeMedia()" data-value="{{_timeMath()}}"></slider-input>
     </div>
   </div>
 

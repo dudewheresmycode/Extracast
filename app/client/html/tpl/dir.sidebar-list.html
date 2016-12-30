@@ -18,4 +18,22 @@
 
   <a class="list-group-item" ng-show="createMode" new-playlist></a>
   <a ng-click="createMode=true" class="list-group-item"><div><span class="icon icon-plus"></span> Create</div></a>
+
+  <div class="context" ng-class="{open:isOpen()}">
+    <div class="context-menu" ng-style="contextStyle()">
+      <a class="dropdown-item" ng-click="item_play()">
+        <span class="icon icon-play"></span> Play
+      </a>
+      <a class="dropdown-item" ng-click="item_queue()">
+        <span class="icon icon-list2"></span> Add to Queue
+      </a>
+      <a class="dropdown-item" ng-click="item_edit()">
+        <span class="icon icon-pencil2"></span> Edit
+      </a>
+      <a class="dropdown-item" ng-click="item_remove()">
+        <span class="icon icon-cross"></span> Remove
+      </a>
+    </div>
+  </div>
+
 </div>

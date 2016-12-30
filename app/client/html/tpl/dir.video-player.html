@@ -1,6 +1,6 @@
 <div class="video-view" ng-show="_playerStatus().state!=STATE_STOPPED" ng-class="{minified:minified}">
   <div class="video-splash">
-    <div class="video-splash-bg" ng-style="{'background-image':'url(\'file://'+_playerStatus().media.thumbnails.full+'\')'}"></div>
+    <div class="video-splash-bg" ng-style="_splashBg()"></div>
     <div class="video-splash-icon chromecast-icon" ng-if="_playerStatus().type==CHROMECAST_PLAYER" ng-include="'../images/chromecast/ic_cast_connected_24dp.svg'"></div>
   </div>
 
