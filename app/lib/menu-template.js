@@ -113,6 +113,14 @@ if (process.platform === 'darwin') {
         type: 'separator'
       },
       {
+        role: 'preferences',
+        label: 'Preferences',
+        click: () => {
+          console.log('Settings Clicked');
+          BrowserWindow.getFocusedWindow().webContents.send('goto.settings');
+        }
+      },
+      {
         role: 'services',
         submenu: []
       },

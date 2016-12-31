@@ -256,7 +256,7 @@ a:hover .icon {
   text-align: center;
 }
 .checkbox-custom:checked + .checkbox-custom-label:before {
-  background: #FF5500;
+  background: #2485E0;
   box-shadow: inset 0px 0px 0px 4px #fff;
 }
 .radio-custom + .radio-custom-label:before {
@@ -305,7 +305,7 @@ a:hover .icon {
   background-color: #222 !important;
 }
 .list-group .list-group-item.active {
-  color: #FF5500 !important;
+  color: #2485E0 !important;
   /*border-color: #155C85;*/
 }
 .list-group .list-group-item .list-group-content {
@@ -358,7 +358,7 @@ a:hover .icon {
 }
 .list-group.list-group-sidebar .list-group-item.active {
   color: #fff !important;
-  border-left: 4px solid #FF5500;
+  border-left: 4px solid #2485E0;
   /*border-color: #155C85;*/
 }
 .float-right {
@@ -703,7 +703,7 @@ a:hover .icon {
   position: absolute;
   top: 2.5px;
   left: 0;
-  background-color: #FF5500;
+  background-color: #2485E0;
   border-radius: 20px;
   height: 5px;
   width: 0;

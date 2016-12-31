@@ -136,6 +136,11 @@ angular.module('ec.directives',[])
       //   }
       // });
       //
+
+      scope.$captions = function(){
+        
+      }
+
       scope.$fullscreen = function(){
         if($ecPlayerStatus.get("type")==$rootScope.LOCAL_PLAYER)
           $player.fullscreen();
@@ -544,16 +549,20 @@ angular.module('ec.directives',[])
     }
   }
 })
-.directive('settingsView', function($ecConfig){
+.directive('settingsView', function($ecConfig,$timeout){
   return {
     templateUrl: 'tpl/dir.settings.html',
     link: function(scope,ele,attr){
+      scope.timer = $timeout();
 
       scope.settings = angular.copy($ecConfig.all());
       scope.$watch('settings',function(nv,ov){
         if(nv && nv!=ov){
-          //console.log("SETTINGS ", nv, ov);
-          $ecConfig.set(nv);
+          $timeout.cancel(scope.timer);
+          scope.timer = $timeout(function(){
+            //debounce commit to DB
+            $ecConfig.set(nv);
+          },600);
         }
       },true);
     }

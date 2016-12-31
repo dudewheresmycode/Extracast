@@ -28,8 +28,6 @@ process.env.FFMPEG_BIN_DIR = 'ffmpeg-bundle/';
 process.env.FFMPEG_BIN_PATH = searchBinaryPath("ffmpeg");
 process.env.FFPROBE_BIN_PATH = searchBinaryPath("ffprobe");
 
-log.info("Extracast - FFMPEG PATH: "+process.env.FFMPEG_BIN_PATH);
-
 
 let transcode_process=false;
 
@@ -157,6 +155,7 @@ function resize(input,options,callback){
     })
     .on('error', function(err) {
       console.log(err);
+
     });
 }
 
@@ -289,13 +288,12 @@ var streamOverHTTP = function(options, http_res){
       //if(currentSender) currentSender.send('transcode.stats', obj);
     })
     .on('finish', function() {
-      console.log('finished transcoding');
       ec_http.stop();
       //transcode_server.close();
     })
     .on('error', function(err) {
       //done(err);
-      console.log('transcoding error: %o', err);
+      log.error(`Transocding error: ${err}`);
     });
 
     transcode_process.stream().pipe(http_res);

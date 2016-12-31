@@ -43,7 +43,6 @@ module.exports.server = function(options,callback){
           cert: fs.readFileSync(electronApp.getAppPath()+'/ssl/_.extcast.net.x509.crt'),
           ca: fs.readFileSync(electronApp.getAppPath()+'/ssl/ca.pem')
         }, module.exports._handle_request).listen(process.env.HTTP_STREAM_PORT, function(){
-          console.log(streamUrl);
           callback(null, streamUrl);
         });
         return;
@@ -51,7 +50,6 @@ module.exports.server = function(options,callback){
 
       //start normal HTTP server
       transcodeServer = http.createServer(module.exports._handle_request).listen(process.env.HTTP_STREAM_PORT, function(){
-        console.log(streamUrl);
         callback(null, streamUrl);
       });
 
@@ -66,20 +64,21 @@ function _get_ip_addr(callback){
 
 module.exports._handle_request = function(req,res){
 
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Request-Method', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  if ( req.method === 'OPTIONS' ) {
+    res.end();
+    return;
+  }
+
   if(/(.*)(\.mp4|\.webm)/g.test(req.url)){
   //if(req.url=='/stream.mp4'){
 
-    res.setHeader('Access-Control-Allow-Origin', '*');
-  	res.setHeader('Access-Control-Request-Method', '*');
-  	res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
-  	res.setHeader('Access-Control-Allow-Headers', '*');
     res.setHeader('Content-Type', 'video/mp4');
     res.writeHead(200);
 
-    if ( req.method === 'OPTIONS' ) {
-  		res.end();
-  		return;
-  	}
 
     module.exports.emit('streamRequest', _options, res);
     // console.log(transcoder, transcoder.streamOverHTTP);
@@ -96,6 +95,9 @@ module.exports._handle_request = function(req,res){
   }else if(/sm(.*).jpg/g.test(req.url)){
     res.writeHead(200, {'Content-Type':'image/jpeg'});
     fs.createReadStream(_options.thumbnails.square).pipe(res);
+  }else if(/(.*).srt/g.test(req.url)){
+    res.writeHead(200, {'Content-Type':'text/plain'});
+    fs.createReadStream(_options.subtitles.path).pipe(res);
   }else{
     res.writeHead(404, {'Content-Type':'text/plain'});
     res.end("404: Not found");

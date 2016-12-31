@@ -92,8 +92,6 @@ angular.module('ec.providers',[])
 .provider("$ecConfig", function(){
   var self = this;
   self.config = lowdb.getState().config;
-  console.log("CONFIG", self.config);
-
   this.$get = function($rootScope){
     var that = this;
 
@@ -107,7 +105,6 @@ angular.module('ec.providers',[])
         return ['480','720','1080'];
       },
       set: function(config){
-        console.log("SET", config);
         lowdb
         //.get('config')
         .set("config", config)
@@ -146,6 +143,7 @@ angular.module('ec.providers',[])
         thumbnails:item.thumbnails,
         inputFile:item.file.path,
         inputType:item.file.type,
+        subtitles:item.subtitles,
         playerType: $ecPlayerStatus.get("type"),
         duration:item.meta.duration,
         vopts:$ecConfig.get("video")
@@ -181,7 +179,6 @@ angular.module('ec.providers',[])
         $rootScope.$emit('player.start', item, stream);
         $rootScope.$apply();
       }else if($ecPlayerStatus.get("type")==$rootScope.CHROMECAST_PLAYER){
-        console.log("CHROME")
         $chromecast.start(item, stream);
       }
     });
@@ -209,10 +206,8 @@ angular.module('ec.providers',[])
       pause: function(){
 
         if($ecPlayerStatus.get("state")==$rootScope.STATE_PLAYING){
-          console.log("PAUSE");
            $rootScope.$emit('player.pause');
         }else if($ecPlayerStatus.get("state")==$rootScope.STATE_PAUSED){
-          console.log("RESUME");
           $rootScope.$emit('player.resume');
         }
         //   //ipc.sendSync("transcode.stop");
@@ -536,6 +531,9 @@ angular.module('ec.providers',[])
             }
           };
 
+          if($ecPlayerStatus.get('media').subtitles){
+            media.metadata.subtitles = util.format("https://%s.extcast.net:%s/subs-%s.srt", addr.replace(/\./g,"-"), port, $ecPlayerStatus.get('media').id);
+          }
 //          console.log('app "%s" launched, loading media %s ...', that._player.session.displayName, media.contentId);
           that._player.load(media, { autoplay: true }, function(err, status) {
             that._updateStatus(status,true);
