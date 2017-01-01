@@ -16,7 +16,7 @@
           <a href ng-click="$stop()"><span class="icon icon-stop2"></span></a>
         </li> -->
 
-        <li class="nav-item">
+        <li class="nav-item" ng-class="{disabled:_controlDisabled()}">
           <!-- <a href ui-sref="settings"><span class="icon icon-cog"></span></a> -->
           <a href ng-click="$captions()"><span class="icon icon-bubble"></span></a>
           <!-- <div class="dropdown dropup">
@@ -29,17 +29,17 @@
             </div>
           </div> -->
         </li>
-        <li class="nav-item" ng-class="{disabled:_playerStatus().state==_rootStatus('STATE_STOPPED')}">
+        <li class="nav-item" ng-class="{disabled:_controlDisabled()}">
           <a href><span class="icon icon-backward2"></span></a>
         </li>
-        <li class="nav-item nav-item-center">
+        <li class="nav-item nav-item-center" ng-class="{disabled:_controlDisabled()}">
            <!-- ng-class="{disabled:_playerStatus().state==_rootStatus('STATE_STOPPED')}"> -->
           <a href ng-click="$pause()"><span class="icon" ng-class="_playerStatus().state==_rootStatus('STATE_PLAYING')?'icon-pause2':'icon-play3'"></span></a>
         </li>
-        <li class="nav-item" ng-class="{disabled:_playerStatus().state==_rootStatus('STATE_STOPPED')}">
+        <li class="nav-item" ng-class="{disabled:_controlDisabled()}">
           <a href><span class="icon icon-forward3"></span></a>
         </li>
-        <li class="nav-item" ng-class="{disabled:_playerStatus().state==_rootStatus('STATE_STOPPED')}">
+        <li class="nav-item" ng-class="{disabled:_controlDisabled()}">
           <a href ng-click="$fullscreen()"><span class="icon icon-enlarge2"></span></a>
         </li>
         <!-- <li>
@@ -60,8 +60,7 @@
       <a href ng-click="$mute()"><span class="icon icon-volume-low"></span></a>
       <slider-input data-oninput="$volume" data-value="{{_playerStatus().volume}}"></slider-input>
     </li>
-    <li class="nav-item chromecast">
-      <chrome-cast></chrome-cast>
+    <li class="nav-item chromecast" chromecast-button>
     </li>
   </ul>
 </nav>

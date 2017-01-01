@@ -97,7 +97,11 @@ module.exports._handle_request = function(req,res){
     fs.createReadStream(_options.thumbnails.square).pipe(res);
   }else if(/(.*).srt/g.test(req.url)){
     res.writeHead(200, {'Content-Type':'text/plain'});
-    fs.createReadStream(_options.subtitles.path).pipe(res);
+    if(_options.subtitles && fs.existsSync(_options.subtitles)){
+      fs.createReadStream(_options.subtitles).pipe(res);
+    }else{
+      res.end("1\n00:00:00,000 --> 00:00:05,000\nSubtitle file not found...");
+    }
   }else{
     res.writeHead(404, {'Content-Type':'text/plain'});
     res.end("404: Not found");

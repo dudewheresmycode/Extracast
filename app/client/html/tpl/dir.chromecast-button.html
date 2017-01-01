@@ -10,6 +10,9 @@
     <a ng-if="_isc()" class="dropdown-item bg-danger" ng-click="$disconnect()">
       Disconnect
     </a>
+    <a ng-if="!devices().length" class="dropdown-item dropdown-item-blank">
+      No Devices Found
+    </a>
     <a ng-repeat="device in devices()" class="dropdown-item" ng-click="$connect(device)">
       <span class="icon icon-fw icon-display"></span> {{device.txtRecord.fn}}
     </a>

@@ -293,6 +293,7 @@ a:hover .icon {
   font-weight: 600;
   font-size: 11px;
   padding-bottom: 5px;
+  margin: 10px 0;
 }
 .list-group > .list-group-separator {
   border-bottom: 1px solid #222;
@@ -388,9 +389,12 @@ a:hover .icon {
   border-radius: 10px;
   background: rgba(100, 100, 100, 0.33);
 }
-.context,
 .dropdown {
   position: relative;
+  box-sizing: border-box;
+}
+.context {
+  position: absolute;
   box-sizing: border-box;
 }
 .dropdown > a {
@@ -406,27 +410,54 @@ a:hover .icon {
   top: 50%;
   right: -0.5em;
 }
-.context .context-menu {
-  margin-top: 5px;
-  background: #000;
+.context .context-menu,
+.context .context-menu .dropdown-item-sub .context-sub-menu {
+  margin-top: -10px;
+  background: #101010;
   display: none;
-  position: fixed;
+  margin-left: 4px;
   min-width: 200px;
-  min-height: 200px;
-  box-shadow: 1px 0px 5px rgba(0, 0, 0, 0.5);
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.6);
 }
 .dropdown .dropdown-menu {
-  background: #000;
+  background: #101010;
   display: none;
   position: absolute;
   box-sizing: border-box;
   min-width: 200px;
   right: 0px;
   bottom: 0px;
-  box-shadow: 1px 0px 5px rgba(0, 0, 0, 0.5);
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.6);
 }
-.context .context-menu {
+.context .context-menu,
+.context .context-menu .dropdown-item-sub .context-sub-menu {
   position: fixed;
+}
+.context .context-menu .dropdown-item-sub {
+  position: relative;
+}
+.context .context-menu .dropdown-item-sub:after {
+  content: '';
+  display: block;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 5px solid #fff;
+  width: 0;
+  height: 0;
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  margin-top: -5px;
+}
+.context .context-menu .dropdown-item-sub .context-sub-menu {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: 0;
+  min-width: 200px;
+}
+.context .context-menu .dropdown-item-sub:hover .context-sub-menu {
+  display: block;
 }
 .dropdown.dropup .dropdown-menu {
   bottom: 0px;
@@ -443,19 +474,25 @@ a:hover .icon {
 .context .context-menu .dropdown-item,
 .dropdown .dropdown-menu .dropdown-item {
   display: flex;
-  padding: 15px;
+  padding: 10px 15px;
   box-sizing: border-box;
   align-items: center;
-  border-bottom: 1px solid #111;
+  border-bottom: 0px solid #202020;
+}
+.context .context-menu .dropdown-item:not(.dropdown-item-blank):hover,
+.dropdown .dropdown-menu .dropdown-item:not(.dropdown-item-blank):hover {
+  background-color: #077A4A;
+  /*background-color: rgba(100,100,100,0.25);*/
+}
+.context .context-menu .dropdown-item.dropdown-item-blank,
+.dropdown .dropdown-menu .dropdown-item.dropdown-item-blank {
+  color: #aaa;
+  padding: 30px 15px;
+  justify-content: center;
 }
 .context .context-menu .dropdown-item .icon,
 .dropdown.open .dropdown-menu .dropdown-item .icon {
   margin-right: 0.5em;
-}
-.context .context-menu .dropdown-item:hover,
-.dropdown .dropdown-menu .dropdown-item:hover {
-  background-color: #077A4A;
-  /*background-color: rgba(100,100,100,0.25);*/
 }
 .video-view {
   position: fixed;

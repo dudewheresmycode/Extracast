@@ -1,0 +1,15 @@
+<div class="context" ng-class="{open:$ctl._isVisible()}">
+  <div class="context-menu" ng-style="$ctl._contextStyle()">
+    <div ng-repeat="option in options">
+      <a class="dropdown-item" ng-if="option.fn" ng-click="$ctl.$select(option)">{{option.label}}</a>
+      <div class="dropdown-item-sub" ng-if="option.menu">
+        <a class="dropdown-item" ng-bind-html="option.label"></a>
+        <div class="context-sub-menu">
+          <a class="dropdown-item" ng-click="$ctl.$select(option,sub)" ng-repeat="sub in option.menu">
+            {{sub.label}}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

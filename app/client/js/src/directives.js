@@ -2,6 +2,7 @@ var $ = jQuery = require('jquery');
 
 var util = require('util');
 var ipc = require('electron').ipcRenderer;
+var shell = require('electron').shell;
 var moment = require('moment');
 var BigScreen = require('bigscreen');
 
@@ -91,7 +92,7 @@ angular.module('ec.directives',[])
 })
 .directive('playerControls',function($chromecast,$ecStreamCtl,$ecPlayerStatus,$rootScope,$player,$media){
   return {
-    scope: {},
+    //scope: {},
     replace:true,
     templateUrl: 'tpl/dir.player-controls.html',
     link: function(scope,ele,attr){
@@ -103,6 +104,9 @@ angular.module('ec.directives',[])
       scope._activeMedia = function(){ return $ecPlayerStatus.get('media'); }
       scope._isChromeCastPlayer = function(){
         return $ecPlayerStatus.get("type")==$rootScope.CHROMECAST_PLAYER;
+      }
+      scope._controlDisabled = function(){
+        return ![$rootScope.STATE_PLAYING, $rootScope.STATE_PAUSED].includes($ecPlayerStatus.get("state"));
       }
       scope._rootStatus = function(s){
         return $rootScope[s];
@@ -138,7 +142,7 @@ angular.module('ec.directives',[])
       //
 
       scope.$captions = function(){
-        
+        $chromecast.toggleCaptions();
       }
 
       scope.$fullscreen = function(){
@@ -179,7 +183,7 @@ angular.module('ec.directives',[])
     }
   }
 })
-.directive('chromeCast', function($chromecast,$player,$ecStreamCtl,$ecPlayerStatus,$ecConfig,$rootScope){
+.directive('chromecastButton', function($chromecast,$player,$ecStreamCtl,$ecPlayerStatus,$ecConfig,$rootScope){
   return {
     templateUrl: 'tpl/dir.chromecast-button.html',
     link: function(scope,ele,attr){
@@ -440,28 +444,102 @@ angular.module('ec.directives',[])
     }
   }
 })
-.directive('contextGroup', function($rootScope){
+.directive('contextGroup', function($parse,$templateRequest,$compile,$rootScope){
   return {
-    scope: {},
-    link: function(scope,ele,attr){
-      scope.isOpen = function(){
-        return $rootScope.contextVisible;
+    restrict: 'A',
+    scope: {
+      contextGroup:'='
+    },
+    controllerAs: '$ctl',
+    controller: function($scope){
+      console.log("ctx", $scope.contextGroup);
+      var self = this;
+      //$scope.$ctl = this;
+      this.visible = false;
+      this.position = [0,0];
+      this.selectedItem = null;
+
+      this._isVisible = function(){
+        return this.visible;
       }
-      $rootScope.contextVisible = false;
-      scope.position = [0,0];
-      scope.selectedMedia = null;
-      scope.contextStyle = function(){
-        console.log(scope.position);
-        return {top:scope.position[1]+'px',left:scope.position[0]+'px'};
-      }
-      scope.item_play = function(){
-        console.log("$PLAY", scope.selectedMedia);
-        scope.$play(scope.selectedMedia);
+      this._contextStyle = function(){
+        return {top:self.position[1]+'px',left:self.position[0]+'px'};
       }
 
+      $rootScope.$on('close.context', function(){
+        if(self.visible){
+          $scope.$parent.selected = null;
+          self.enableScroll();
+        }
+        self.visible = false;
+      });
+
+        function preventDefault(e) {
+        e = e || window.event;
+        if (e.preventDefault)
+            e.preventDefault();
+        e.returnValue = false;
+      }
+      this.disableScroll = function() {
+        if (window.addEventListener) // older FF
+            window.addEventListener('DOMMouseScroll', preventDefault, false);
+        window.onwheel = preventDefault; // modern standard
+        window.onmousewheel = document.onmousewheel = preventDefault; // older browsers, IE
+        window.ontouchmove  = preventDefault; // mobile
+        //document.onkeydown  = preventDefaultForScrollKeys;
+      }
+
+      this.enableScroll = function() {
+          if (window.removeEventListener)
+              window.removeEventListener('DOMMouseScroll', preventDefault, false);
+          window.onmousewheel = document.onmousewheel = null;
+          window.onwheel = null;
+          window.ontouchmove = null;
+          document.onkeydown = null;
+      }
+
+      this.$select = function(item,sub){
+        if(typeof item.fn=='function'){
+          item.fn(self.selectedItem);
+        }else if(typeof sub.fn=='function'){
+          sub.fn(self.selectedItem, sub);
+        }
+        //$scope.$parent.$emit("context.select", item);
+      }
+
+
+    },
+    link: function(scope,ele,attr,$ctl){
+
+      scope.$watch('contextGroup',function(nv){
+        console.log("ctx-ch", nv);
+        scope.options = nv;
+      });
+      //scope.options = $parse(attr.contextGroup)(scope);
+
+      scope.selectedMedia = null;
+
+      // scope._isVisible = function(){
+      //   return scope.visible;
+      // }
+      // scope._contextStyle = function(){
+      //   console.log('pos', scope.position);
+      //   return {top:scope.position[1]+'px',left:scope.position[0]+'px'};
+      // }
+      //
+      //
+      //
       $(window).on('click',function(e){
-        $rootScope.contextVisible = false;
-        scope.$apply();
+        $rootScope.$emit('close.context');
+        $rootScope.$apply();
+      });
+
+      $templateRequest("tpl/tpl.dropdown.html").then(function(html){
+         var template = angular.element(html);
+         ele.append(template);
+         //scope.$menu = template.find('.context-menu');
+         $ctl.$menu = $(ele).parent().find('.context')[0];
+         $compile(template)(scope);
       });
 
 
@@ -472,31 +550,45 @@ angular.module('ec.directives',[])
 .directive('contextRow', function($rootScope,$parse){
   return {
     //scope:{contextRow:'='},
-    link: function(scope,ele,attr){
+    require: "^contextGroup",
+    link: function(scope,ele,attr,contextGroup){
       //scope.item = scope.contextRow;
       //scope._visible = false;
       var item = $parse(attr.contextRow)(scope);
+
       // scope.item_play = function(){
       //   console.log("$PLAY", item);
       //   scope.$parent.$play(item);
       // }
 
       $(ele).on('mousedown',function(event){
+        //scope.$parent.selected = item.id;
+        //$rootScope.$emit('close.context');
+        console.log($(ele).parent().find('context'));
         if(event.which==3){
-          var maxX = $(window).width() - $(ele).parent().closest('.context-menu').outerWidth();
-          var cx = event.pageX > maxX ? maxX : event.pageX;
-          console.log(maxX, cx);
-          scope.$parent.position = [cx,event.pageY];
-          $rootScope.contextVisible = true;
-          //$(ele).find('.context-menu').addClass('open');
-          console.log("Context", event, scope.$parent.position);
+          scope.$parent.selected = item.id;
+          $rootScope.$emit('close.context');
+          contextGroup.position = [event.pageX, event.pageY];
+          contextGroup.visible = true;
+          contextGroup.selectedItem = item;
+          contextGroup.disableScroll();
+          $rootScope.$apply();
+          console.log('rgt-click', contextGroup.$menu);
           event.preventDefault();
           event.stopPropagation();
 
-          //scope.$parent.selectedMedia = item;
-          //scope.$parent.selected = item.id;
-          scope.$apply();
+
+        //   //$rootScope.$emit('close.context');
+        //   //var maxX = $(window).width() - $(ele).parent().closest('.context-menu').outerWidth();
+        //   var maxX =  $(window).width() - 400;
+        //   var cx = event.pageX > maxX ? maxX : event.pageX;
+        //   scope.$parent.position = [cx, event.pageY];
+        //   scope.$parent.visible = true;
+        //   scope.$parent.selectedMedia = item;
+        //
+        //   //scope.$parent.selected = item.id;
         }
+        // scope.$parent.$apply();
       });
 
     }
@@ -541,8 +633,30 @@ angular.module('ec.directives',[])
     templateUrl: 'tpl/dir.sidebar-list.html',
     replace:true,
     link: function(scope,ele,attr){
+
+      scope.contextOptions = [
+        {
+          id:'edit',
+          label:'Edit',
+          fn:function(item){
+            console.log("EDIT", item);
+          }
+        },
+        {
+          id: 'remove',
+          label: 'Remove',
+          fn: function(item){
+            $media.removePlaylist(item.id);
+            console.log("remove Playlist", item);
+          }
+        }
+      ];
+      // scope.$on('context.select', function(v){
+      //   console.log("sidebar.context.select", v);
+      // });
       scope.createMode=false;
-      scope.playlists = function(){ return $filter('orderBy')($media.playlists(), 'name'); }
+      //scope.playlists = function(){ return $filter('orderBy')($media.playlists(), 'name'); }
+      scope.playlists = function(){ return $media.playlists(); }
       scope.createPlaylist = function(){
         scope.createMode=true;
       }
@@ -569,48 +683,101 @@ angular.module('ec.directives',[])
   }
 })
 
-.directive('mediaList',function($rootScope,$ecPlayerStatus,$ecStreamCtl,$filter,$timeout,$chromecast,$ecConfig,$player,$media){
+.directive('mediaList',function($rootScope,$sce,$ecPlayerStatus,$ecStreamCtl,$filter,$timeout,$chromecast,$ecConfig,$player,$media){
   return {
     //scope: {},
     replace:true,
     templateUrl: 'tpl/dir.media-list.html',
     link: function(scope,ele,attr){
 
+      var playListMenu = function(){
+        return $media.playlists().map(function(it){
+          var pselect = function(item){
+            $media.addToPlaylist(item, it);
+            //console.log("ADD TO PLAYLIST", item, it);
+          }
+          return {label:it.name, fn: pselect};
+        });
+      }
+      // [
+      //   {
+      //     label:"Playlist 1",
+      //     fn: function(item,subItem){
+      //
+      //     }
+      //   }
+      // ];
+      scope.contextOptions = [
+        {
+          label:'Edit',
+          fn:function(item){
+            console.log("EDIT", item);
+          }
+        },
+        {
+          label:$sce.trustAsHtml("Add to Playlist&hellip;"),
+          menu: playListMenu()
+        },
+        {
+          label: 'Show in Finder',
+          fn: function(item){
+            shell.showItemInFolder(item.file.path);
+          }
+        },
+        {
+          label:'Remove',
+          fn:function(item){
+            $media.remove(item.id);
+            console.log("REMOVE", item.id);
+          }
+        }
+      ];
+      //   {id:'edit',label:'Edit', fn:function(){ console.log("ML_EDIT"); }},
+      //   {id:'reveal',label:'Reveal', fn:function(){ console.log("ML_REVA"); }},
+      //   {id:'remove',label:'Remove', fn:function(){ console.log("ML_REMOVE"); }}
+      // ];
+      // scope.$on('context.select', function(v){
+      //   console.log("media.context.select", v);
+      // });
+
       scope._activeMedia = function(){ return $ecPlayerStatus.get('media'); }
 
-      scope.$context = function($event){
-        var t = $event.target.localName=='span' ? $event.target.parentNode : $event.target;
-        console.dir(t);
-        //$(t).dropdown('show');
-        //$event.preventDefault();
-        $event.stopPropagation();
+      scope.list = function(){
+        return $filter('orderBy')($media.list(), 'file.name');
       }
+
+      // scope.item_reveal = function(){
+      //   var media = $media.findById(scope.selected);
+      //   console.log("$reveal", media);
+      //   shell.showItemInFolder(media.file.path);
+      // }
+      //
+      // scope.item_play = function(){
+      //   var media = $media.findById(scope.selected);
+      //   console.log("$play", media);
+      // }
+      //
+      // scope.item_remove = function(){
+      //   var media = $media.findById(scope.selected);
+      //   console.log("$remove", media);
+      // }
+
+
       scope.$select = function(item){
         scope.selected = item.id;
       }
+
+      //item was double clicked...
       scope.$play = function(item){
         console.log("PLAY", item);
 
         scope.selected = item.id
         $ecPlayerStatus.set('media', item);
-        //$rootScope.activeMedia = item;
-        //$rootScope.seekOffset = 0;
         $rootScope.playerType = $chromecast.isConnected() ? $rootScope.CHROMECAST_PLAYER : (item.file.type=='Audio' ? $rootScope.AUDIO_PLAYER : $rootScope.LOCAL_PLAYER);
         //start transcode
         var isStream = $rootScope.playerType == $rootScope.CHROMECAST_PLAYER;
         $ecStreamCtl.start(item);
-        // ipc.send("transcode.stream", {
-        //   thumbnails:$rootScope.activeMedia.thumbnails,
-        //   inputFile:item.file.path,
-        //   inputType:item.file.type,
-        //   duration:item.meta.duration,
-        //   http_stream:($rootScope.playerType == $rootScope.CHROMECAST_PLAYER),
-        //   vopts:$ecConfig.get("video")
-        // });
 
-      }
-      scope.list = function(){
-        return $filter('orderBy')($media.list(), 'file.name');
       }
     }
   }

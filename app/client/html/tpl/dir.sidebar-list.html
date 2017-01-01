@@ -1,4 +1,5 @@
-<div class="list-group list-group-sidebar">
+
+<div class="list-group list-group-sidebar" context-group="contextOptions">
   <a ui-sref-active="active" ui-sref="library()" class="list-group-item active"><div><span class="icon icon-book"></span> Media Library</div></a>
 
   <!-- <li class="list-group-separator"></li> -->
@@ -8,32 +9,17 @@
   <!-- Maybe someday -->
   <!-- <a class="list-group-item"><span class="icon icon-book"></span> Netflix</li> -->
 
+
   <div class="list-group-heading">
     Playlists
   </div>
-  <a ui-sref-active="active" ui-sref="playlist({listId:'a2390ad9'})" class="list-group-item"><div><span class="icon icon-folder"></span> Playlist 1</div></a>
-  <a ng-repeat="playlist in playlists() track by playlist.id" context-row="playlist" ui-sref-active="active" ui-sref="playlist({listId:playlist.id})" class="list-group-item">
+  <!-- <a ui-sref-active="active" ui-sref="playlist({listId:'a2390ad9'})" class="list-group-item"><div><span class="icon icon-folder"></span> Playlist 1</div></a> -->
+
+  <a ng-repeat="playlist in playlists() track by playlist.id" context-row="playlist" ng-class="{selected:selected==playlist.id}" ui-sref-active="active" ui-sref="playlist({listId:playlist.id})" class="list-group-item">
     <div><span class="icon icon-folder"></span> {{playlist.name}}</div>
   </a>
 
   <a class="list-group-item" ng-show="createMode" new-playlist></a>
   <a ng-click="createMode=true" class="list-group-item"><div><span class="icon icon-plus"></span> Create</div></a>
-
-  <div class="context" ng-class="{open:isOpen()}">
-    <div class="context-menu" ng-style="contextStyle()">
-      <a class="dropdown-item" ng-click="item_play()">
-        <span class="icon icon-play"></span> Play
-      </a>
-      <a class="dropdown-item" ng-click="item_queue()">
-        <span class="icon icon-list2"></span> Add to Queue
-      </a>
-      <a class="dropdown-item" ng-click="item_edit()">
-        <span class="icon icon-pencil2"></span> Edit
-      </a>
-      <a class="dropdown-item" ng-click="item_remove()">
-        <span class="icon icon-cross"></span> Remove
-      </a>
-    </div>
-  </div>
 
 </div>

@@ -20,7 +20,7 @@ const menuTemplate = [
             click: () => {
               console.log('Open Clicked');
 
-              var files = dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']});
+              var files = dialog.showOpenDialog({filters: OK_TYPES, properties: ['openFile', 'openDirectory', 'multiSelections']});
               if(files && files.length){
                 var mapd = files.map(function(fp){
                   var type = OK_TYPES.find(function(it){ return it.extensions.indexOf(path.extname(fp).substr(1)) > -1; }).name;
