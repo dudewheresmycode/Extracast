@@ -244,7 +244,7 @@ angular.module('ec.directives',[])
     }
   }
 })
-.directive('videoPlayer', function($rootScope,$ecLastFrameStore,$timeout,$ecStreamCtl,$chromecast,$ecPlayerStatus,$ecConfig,$player){
+.directive('videoPlayer', function($rootScope,$ecLastFrameStore,$timeout,$ecStreamCtl,$media,$chromecast,$ecPlayerStatus,$ecConfig,$player){
   return {
     templateUrl: 'tpl/dir.video-player.html',
     replace: true,
@@ -335,6 +335,16 @@ angular.module('ec.directives',[])
       scope.videoEle.addEventListener('ended',function(){
         console.log("STOPPED");
         scope.$stop(true);
+        $ecLastFrameStore.clear();
+        //play next?
+        var q = $ecPlayerStatus.get('queue');
+        if(q.length>0){
+          var next = q.shift();
+          $ecPlayerStatus.set('queue', q);
+          $ecPlayerStatus.set('media', $media.findById(next));
+          $ecStreamCtl.start($ecPlayerStatus.get('media'), 0);
+        }
+        //all done
 //
 // //        $rootScope.videoActive = false;
 //         $rootScope.$emit('player.ended');
@@ -370,6 +380,7 @@ angular.module('ec.directives',[])
       }
 
 
+
       scope.$stop = function(playerRequested){
         //$rootScope.activeMedia = null;
         $ecPlayerStatus.set('media',null)
@@ -377,11 +388,11 @@ angular.module('ec.directives',[])
         $ecPlayerStatus.set("currentTime", 0);
         $ecPlayerStatus.set("seekOffset", 0);
 
+        //user requested
         if(!playerRequested){
+          $ecPlayerStatus.set("queue", []);
           //first stop the stream
           $ecStreamCtl.stop();
-
-
           if($ecPlayerStatus.get("type")==$rootScope.CHROMECAST_PLAYER){
             $chromecast.stop();
           }else if($ecPlayerStatus.get("type")==$rootScope.LOCAL_PLAYER){
@@ -682,7 +693,57 @@ angular.module('ec.directives',[])
     }
   }
 })
+.directive('playList', function($stateParams,$media,$ecStreamCtl,$ecPlayerStatus,$chromecast,$player){
+  return {
+    replace:true,
+    templateUrl: 'tpl/dir.play-list.html',
+    link: function(scope){
 
+      scope.playlist = $media.getPlaylist($stateParams.listId);
+      scope.queueList = function(){
+        return $ecPlayerStatus.get('queue');
+      }
+      scope.contextOptions = [
+        {
+          label: 'Show in Finder',
+          fn: function(item){
+            shell.showItemInFolder(item.file.path);
+          }
+        },
+        {
+          label:'Remove from Playlist',
+          fn:function(item){
+            $media.remove(item.id);
+            console.log("REMOVE", item.id);
+          }
+        }
+      ];
+      scope.mediaList = function(){
+        return scope.playlist.media.map(function(it){
+          return $media.findById(it);
+        });
+      }
+      scope.$select = function(item){
+        scope.selected = item.id;
+      }
+
+      //item was double clicked...
+      scope.$play = function(item){
+        console.log("PLAY", item);
+
+        scope.selected = item.id
+        $ecPlayerStatus.set('media', item);
+        $ecPlayerStatus.set('queue', scope.playlist.media.slice(scope.playlist.media.indexOf(item.id)+1));
+        //$rootScope.playerType = $chromecast.isConnected() ? $rootScope.CHROMECAST_PLAYER : (item.file.type=='Audio' ? $rootScope.AUDIO_PLAYER : $rootScope.LOCAL_PLAYER);
+        //start transcode
+        //var isStream = $rootScope.playerType == $rootScope.CHROMECAST_PLAYER;
+        $ecStreamCtl.start(item);
+
+      }
+
+    }
+  }
+})
 .directive('mediaList',function($rootScope,$sce,$ecPlayerStatus,$ecStreamCtl,$filter,$timeout,$chromecast,$ecConfig,$player,$media){
   return {
     //scope: {},
@@ -775,7 +836,7 @@ angular.module('ec.directives',[])
         $ecPlayerStatus.set('media', item);
         $rootScope.playerType = $chromecast.isConnected() ? $rootScope.CHROMECAST_PLAYER : (item.file.type=='Audio' ? $rootScope.AUDIO_PLAYER : $rootScope.LOCAL_PLAYER);
         //start transcode
-        var isStream = $rootScope.playerType == $rootScope.CHROMECAST_PLAYER;
+        //var isStream = $rootScope.playerType == $rootScope.CHROMECAST_PLAYER;
         $ecStreamCtl.start(item);
 
       }

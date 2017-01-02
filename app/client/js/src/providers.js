@@ -72,6 +72,7 @@ angular.module('ec.providers',[])
       seekOffset:0,
       volume:100,
       media:null,
+      queue:[],
       state:$rootScope.STATE_STOPPED,
       type:$rootScope.LOCAL_PLAYER
     };
@@ -305,6 +306,9 @@ angular.module('ec.providers',[])
       playlists: function(){
         return that.playlists;
       },
+      getPlaylist: function(id){
+        return that.playlists.find(function(it){ return it.id==id; });
+      },
       addPlaylist: function(name){
         var item = angular.copy({ id: uuidV1(), name:name, created: new Date(), media:[] });
         console.log("PUSH!", item);
@@ -443,12 +447,23 @@ angular.module('ec.providers',[])
           $ecPlayerStatus.set('currentTime', status.currentTime);
         }
         if(status.status){
-          console.log(status.status);
+
+          $ecPlayerStatus.set("state", status.status);
+
           if(status.status==$rootScope.STATE_STOPPED){
             $ecPlayerStatus.set('media', null);
             $ecPlayerStatus.set('currentTime',0);
+
+            var q = $ecPlayerStatus.get('queue');
+            if(q.length > 0){
+              //that._startItem(item, streamUrl);
+              var next = q.shift();
+              $ecPlayerStatus.set('queue', q);
+              $ecPlayerStatus.set('media', $media.findById(next));
+              $ecStreamCtl.start($ecPlayerStatus.get('media'), 0);
+            }
           }
-          $ecPlayerStatus.set("state", status.status);
+
         }
 
 
@@ -521,6 +536,52 @@ angular.module('ec.providers',[])
         callback(err, addr);
       });
     }
+
+    that._startItem = function(item,streamUrl){
+      that._playing = true;
+      console.log("START!!");
+      //$rootScope.playerState=$rootScope.STATE_LOADING;
+      $ecPlayerStatus.set('state', $rootScope.STATE_LOADING);
+
+      that._getIpAddress(function(err,addr){
+        var port = $ecConfig.get("video").port;
+
+        //var streamUrl = util.format("https://%s.xip.io:%s/stream.mp4", addr.replace(/\./g,"-"), port);
+
+        console.log('streamUrl: %s', streamUrl);
+
+        var media = {
+          // Here you can plug an URL to any mp4, webm, mp3 or jpg file with the proper contentType.
+          contentId: streamUrl,
+          contentType: 'video/mp4',
+          streamType: 'LIVE', // BUFFERED or LIVE
+          customData: {
+            media_id:$ecPlayerStatus.get('media').id,
+            seek_offet:$ecPlayerStatus.get('seekOffset'),
+            subtitlesEnabled: false,
+          },
+          //duration: item.meta.duration,
+          metadata: {
+            type: 0,
+            metadataType: 0,
+            duration: $ecPlayerStatus.get('media').meta.duration,
+            title: $ecPlayerStatus.get('media').file.name,
+            images: [
+              { name:"lg", url: util.format("https://%s.extcast.net:%s/lg-%s.jpg", addr.replace(/\./g,"-"), port, $ecPlayerStatus.get('media').id) },
+              { name:"sm", url: util.format("https://%s.extcast.net:%s/sm-%s.jpg", addr.replace(/\./g,"-"), port, $ecPlayerStatus.get('media').id) }
+            ]
+          }
+        };
+
+        if($ecPlayerStatus.get('media').subtitles){
+          media.customData.subtitles = util.format("https://%s.extcast.net:%s/subs-%s.srt", addr.replace(/\./g,"-"), port, $ecPlayerStatus.get('media').id);
+        }
+//          console.log('app "%s" launched, loading media %s ...', that._player.session.displayName, media.contentId);
+        that._player.control({action:'start',media:media});
+
+
+      });
+    }
     return {
       isPlaying: function(){
         return that._playing;
@@ -552,51 +613,7 @@ angular.module('ec.providers',[])
         // });
       },
       start: function(item,streamUrl){
-        that._playing = true;
-        console.log("START!!");
-        //$rootScope.playerState=$rootScope.STATE_LOADING;
-        $ecPlayerStatus.set('state', $rootScope.STATE_LOADING);
-
-        that._getIpAddress(function(err,addr){
-          var port = $ecConfig.get("video").port;
-
-          //var streamUrl = util.format("https://%s.xip.io:%s/stream.mp4", addr.replace(/\./g,"-"), port);
-
-          console.log('streamUrl: %s', streamUrl);
-
-          var media = {
-            // Here you can plug an URL to any mp4, webm, mp3 or jpg file with the proper contentType.
-            contentId: streamUrl,
-            contentType: 'video/mp4',
-            streamType: 'LIVE', // BUFFERED or LIVE
-            customData: {
-              media_id:$ecPlayerStatus.get('media').id,
-              seek_offet:$ecPlayerStatus.get('seekOffset'),
-              subtitlesEnabled: false,
-            },
-            //duration: item.meta.duration,
-            metadata: {
-              type: 0,
-              metadataType: 0,
-              duration: $ecPlayerStatus.get('media').meta.duration,
-              title: $ecPlayerStatus.get('media').file.name,
-              images: [
-                { name:"lg", url: util.format("https://%s.extcast.net:%s/lg-%s.jpg", addr.replace(/\./g,"-"), port, $ecPlayerStatus.get('media').id) },
-                { name:"sm", url: util.format("https://%s.extcast.net:%s/sm-%s.jpg", addr.replace(/\./g,"-"), port, $ecPlayerStatus.get('media').id) }
-              ]
-            }
-          };
-
-          if($ecPlayerStatus.get('media').subtitles){
-            media.customData.subtitles = util.format("https://%s.extcast.net:%s/subs-%s.srt", addr.replace(/\./g,"-"), port, $ecPlayerStatus.get('media').id);
-          }
-//          console.log('app "%s" launched, loading media %s ...', that._player.session.displayName, media.contentId);
-          that._player.control({action:'start',media:media});
-
-
-        });
-
-
+        that._startItem(item,streamUrl);
       },
       // activeFile: function(){
       //   return that._file;

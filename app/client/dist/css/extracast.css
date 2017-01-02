@@ -893,6 +893,9 @@ a:hover .icon {
   fill: #3369E8;
   stroke: none;
 }
+.playlist-header {
+  padding: 30px 15px;
+}
 .inline-icon {
   display: inline-block;
   height: 1.2em;

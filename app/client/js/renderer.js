@@ -68,7 +68,7 @@ run(function($rootScope){
   .state({
     name: 'playlist',
     url: '/playlist/:listId',
-    template: '<h3>playlist!!</h3>'
+    template: '<play-list></play-list>',
   })
   .state({
     name: 'app',

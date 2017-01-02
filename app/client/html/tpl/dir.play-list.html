@@ -1,0 +1,44 @@
+
+<!-- <div ng-repeat="media in mediaList()">{{media.file.name}}</div> -->
+<div>
+
+  <div class="playlist-header">
+    <div class="playlist-art">
+
+    </div>
+    <div class="playlist-body">
+      <h4>{{playlist.name}}</h4>
+    </div>
+  </div>
+  <div class="list-group list-group-bordered" context-group="contextOptions">
+    <!-- <div ng-repeat="item in mediaList() track by item.id" ng-click="$select(item)" ng-dblclick="$play(item)" class="list-group-item" ng-class="{active:_activeMedia().id==item.id,selected:selected==item.id}" context-row="item"> -->
+
+    <div ng-repeat="item in mediaList() track by item.id" ng-click="$select(item)" ng-dblclick="$play(item)" class="list-group-item" ng-class="{active:_activeMedia().id==item.id,selected:selected==item.id}" context-row="item">
+
+
+      <!-- <div class="list-group-art">
+        <img ng-src="{{item|loader}}" class="list-group-image" />
+      </div> -->
+      <!-- <span class="icon icon-file-video"></span> -->
+      <div class="list-group-content">
+        <div class="list-group-static list-group-main">{{item.file.name}}</div>
+      </div>
+
+      <div class="list-group-right">
+        <span class="inline-item"><span class="icon icon-clock"></span> {{item.meta.duration|hhmmss}}</span>
+
+      </div>
+      <div class="list-group-right">
+        <div class="list-group-static list-group-sub text-muted">
+          <!-- <span class="inline-item"><span class="icon icon-info"></span> {{item.meta.format}}</span> -->
+          <span class="inline-item"><span class="icon icon-drive"></span> {{item.file.size|bytes}}</span>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+  <pre>
+    {{queueList()}}
+  </pre>
+</div>
